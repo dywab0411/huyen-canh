@@ -1,3 +1,49 @@
+## Đồng bộ GitHub main — 2026-10-26T00:10:36+07:00
+
+### A. Tổng quan
+PASS: đã push và đối chiếu `refs/heads/main` của dywab0411/huyen-canh với commit nguồn `881e7a812dad2337609bf73eb8ca91cba40341f4`. Đồng bộ từ D:/boi qua checkout riêng trên C, giữ parent lịch sử, không force. Project vẫn IN_PROGRESS, cloud NOT_TESTED; không xác nhận deploy hoặc production-ready. Bốn báo cáo phiên này sẽ nằm trong commit tài liệu kế tiếp. Không thay tỷ lệ hoàn thành chức năng theo rubric trước.
+
+### B. Công việc đã thực hiện
+Sao lưu lịch sử Git đầy đủ bằng bundle, verify exit0; backup tệp tracked cũ và 179 tệp nguồn được duyệt bằng ZIP. Bundle: C:/Users/User/Downloads/boi/huyen-canh-main-before-20261026.bundle, SHA256 F3A203741D6E1272268A3A6563B21B13B48FD5236548AB6B5632AF56C40160C1. Bằng chứng và ZIP: C:/Users/User/Downloads/boi/.github-sync-evidence-20261026. Không đưa backup lên GitHub.
+
+Trước: main `4a5451c2a48e54b6a5958130ac68d1f9d87f844d`, chỉ 25 file root. Sau: 179 file nguồn; 168 file thay đổi trong commit nguồn. Rà soát file tracked cũ: không có file vắng khỏi dự án nên số xóa obsolete=0. Đã thêm src/functions/supabase/tests/prompts/public/scripts/video-template/docs và tài liệu/config mới. Không commit env thật, node_modules/dist/logs/backup/operational data. Quét working tree và staged blob không phát hiện mẫu secrets; đây là heuristic, không phải bảo đảm tuyệt đối. Không ghi credential vào báo cáo.
+
+### C. Kiểm tra chức năng
+PASS cho đồng bộ source, backup bundle, normal push và đối chiếu remote commit. Không sửa chức năng ứng dụng trong phiên này. 17 nhóm chức năng giữ trạng thái và giới hạn kiểm chứng ở báo cáo trước; OAuth/RLS/Storage/admin/lookup/thanh toán cloud vẫn NOT_TESTED/BLOCKED. Checkout giữ false, profile public-only giữ true.
+
+### D. Kết quả kiểm thử
+Checkout C:/Users/User/Downloads/boi/.github-sync-20261026 khớp tệp nguồn D, trừ bốn báo cáo cập nhật phiên này. npm ci --ignore-scripts lần sandbox đầu FAIL exit1 ENOTFOUND registry.npmjs.org và cleanup EPERM; retry có quyền network PASS exit0, 292 packages/293 audited, 0 vulnerabilities. Không đổi lockfile hoặc tắt kiểm tra bảo mật.
+
+| Lệnh | Exit |
+|---|---:|
+| `npm run format:check` | 0 |
+| `npm run lint` | 0 |
+| `npm run typecheck` | 0 |
+| `npm test` | 0 |
+| `npm run test:integration` | 0 |
+| `npm run build:public-preview` | 0 |
+| `npm run check:deploy` | 0 |
+| `npm run check:secrets` | 0 |
+
+Unit37/37; integration62/62. E2E không chạy lại trong phiên đồng bộ; lần trước D46/46, không gán thành lần chạy mới. Public build/artifact kiểm 19 file; cảnh báo chunk lớn hơn300kB còn nguyên. git diff --cached --check ban đầu exit2 do CRLF/khoảng trắng có sẵn; đối chiếu với core.whitespace=cr-at-eol vẫn cảnh báo EOF và khoảng trắng trong giấy phép font. Không sửa migration hoặc bản quyền chỉ để xóa cảnh báo. git bundle verify0, commit0, push0, ls-remote0 và hash trùng. Logs/checks.json/sync-manifest trong thư mục bằng chứng ngoài repo.
+
+### E. Lỗi còn tồn tại
+HC-GH001 P3: cảnh báo khoảng trắng nguồn đã có; tái hiện git diff --check khi stage snapshot. File IMPLEMENTATION_STATUS.md, public/assets/fonts/NotoSerif-OFL.txt, public/assets/ho-sen-demo.vtt, migration001. Giữ nguyên nội dung/giấy phép/lịch sử; không chặn build. Cloud blockers HC-SB/DEPLOY/RPT/ORD/BIRTH/LIB giữ nguyên, xem lịch sử.
+
+### F. Còn thiếu
+Remote GitHub Actions và Cloudflare build/deploy chưa được nghiệm thu trong phiên. Push có thể kích hoạt tích hợp chủ dự án đã cấu hình; không coi điều đó là deploy thành công. Repository visibility không được xác minh bằng API trong phiên. Không truy cập hoặc thay đổi Supabase.
+
+### G. Chủ dự án cần cung cấp
+Không cần gửi secret để hoàn tất push; Git Credential Manager hiện có quyền ghi. Các cấu hình cloud thực hiện theo SUPABASE_SETUP_GUIDE.md và DEPLOY_FREE_GUIDE.md, không gửi secret qua chat.
+
+### H. Tiếp theo
+Kiểm tra Actions/Cloudflare nếu đã kết nối; chỉ công khai public-preview đã chuẩn bị. Supabase cloud cần xác nhận riêng trước migration và QA thật trước checkout. Giữ backup ngoài Git.
+
+### I. Hướng dẫn kiểm tra
+GitHub: https://github.com/dywab0411/huyen-canh/tree/main. Local Windows cd D:\boi; npm run dev -- --port5173 cần viết đúng `--port 5173 --strictPort`; kiểm PID trước khi start. URL http://127.0.0.1:5173. /admin vẫn cần Auth/membership/MFA thật, không có mật khẩu mặc định. Không đổi remote/history của Git local D; checkout thực hiện push ở C như trên.
+
+---
+
 ## MỚI NHẤT — SUPABASE SETUP — 2026-10-25T23:29:50+07:00
 
 ### A. Tổng quan

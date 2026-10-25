@@ -1,3 +1,11 @@
+## GitHub sync — 2026-10-26T00:10:36+07:00
+
+Repository https://github.com/dywab0411/huyen-canh nhánh main; source commit 881e7a812dad2337609bf73eb8ca91cba40341f4 push thường đã xác minh. Checkout push C:/Users/User/Downloads/boi/.github-sync-20261026; source chuẩn D:/boi. 179 files, source manifest và checks/ZIP trong .github-sync-evidence-20261026 ở C; full-history bundle huyen-canh-main-before-20261026.bundle đã verify. Git local D không reset/rebase hoặc thay remote.
+
+Unit37/integration62 và format/lint/typecheck/publicbuild/artifact/secrets mới PASS; E2E không chạy lại. Chỉ đồng bộ source, không thay logic. Bốn báo cáo thêm trong commit tài liệu tiếp theo. Auth/RLS/Storage/checkout cloud chưa nghiệm thu; public-onlytrue/checkoutfalse. Không force push/xóa repository/chạy migration cloud/đổiACL/secret/ngân hàng hoặc xóa đơn. Hướng dẫn kết nối Supabase/Free deploy giữ nguyên. Tiếp tục kiểm remote CI/cloud trước khi tuyên bố deploy.
+
+---
+
 ## Supabase setup — 2026-10-25T23:29:50+07:00
 
 Đọc SUPABASE_SETUP_GUIDE.md trước khi thao tác cloud. Kiến trúc React/Vite + Pages Functions server-only service_role + Supabase Auth/Postgres/Storage. Migration001–013 nguyên vẹn; marker13. Public-only guard bật mặc định trong bộ chuẩn bị, checkout=false. RLS riêng profile/history; đơn/credential/RPC qua backend; bốn bucket PRIVATE; admin membership+AAL2; signed URLs60s; quyền công khai exact revision không lấy từ hai câu video.

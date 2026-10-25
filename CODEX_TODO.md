@@ -1,3 +1,11 @@
+## GitHub sync — 2026-10-26T00:10:36+07:00
+
+- PASS: source commit 881e7a812dad2337609bf73eb8ca91cba40341f4 đã push main, ls-remote trùng; 179 source files, obsolete0. Backup bundle/ZIP ngoài Git.
+- PASS kiểm tra phiên này: format/lint/typecheck/unit37/integration62/publicbuild/artifact/secrets. E2E không chạy lại. Actions/Cloudflare deploy và Supabase vẫn NOT_TESTED.
+- Các blocker cloud và chức năng lịch sử giữ nguyên; không mở checkout.
+
+---
+
 ## Supabase setup — 2026-10-25T23:29:50+07:00
 
 - HC-SB001–004 BLOCKED/NOT_TESTED cloud: schema13, OAuth/MFA/RLS/Storage, staging env, backup/retention. Hướng dẫn mới SUPABASE_SETUP_GUIDE.md.

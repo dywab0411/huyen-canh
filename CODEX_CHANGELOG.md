@@ -68,3 +68,8 @@ Mục tiêu: chuẩn bịCloudflareFree+SupabaseFree+GitHubPrivate. Thêmpublic-
 ## 2026-10-25T23:29:50+07:00 — Chuẩn bị Supabase thật
 
 Rà soát migration001–013, RLS/grants, Storage, OAuthPKCE, adminAAL2, lookup và khóa checkout. Tạo SUPABASE_SETUP_GUIDE.md cùng hướng dẫn Dashboard/env chính xác; liên kết DEPLOY_FREE_GUIDE và VERIFY_STAGING. Unit37, integration62, E2E46 local; logs docs/deploy-free/20261025. Cloud NOT_TESTED, không chạy migration, bootstrap hoặc mở nhận đơn. HC-SB001–004 và blocker cũ còn mở.
+
+
+## 2026-10-26T00:10:36+07:00 — Đồng bộ GitHub main
+
+Sao lưu/verify Git bundle và ZIP trước thay đổi. Đồng bộ179file D sang checkout C, obsolete0; sourcecommit881e7a812dad2337609bf73eb8ca91cba40341f4 đãpushmain thường vàlsremote trùng. Format/lint/typecheck/unit37/integration62/publicbuild/artifact/secretsPASS; npmci retry sauENOTFOUND đạt0, audit0vulns; E2E không chạy lại. Cảnh báo whitespace giữ nguyên. Files thay đổi theo sync-manifest ngoàiGit. Khôngforce/đụngSupabase/checkout/deploy. Cậpnhật4báocáo, cloud/CIchưa nghiệmthu.
