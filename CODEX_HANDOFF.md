@@ -1,3 +1,9 @@
+## OAuth — 2026-10-26T02:30:32+07:00
+
+OAUTH_DIAGNOSIS.md là hướng dẫn mới nhất. Production bundle authnull, CF envVITE Secret chưa vào artifact; deployment3cd559c đúng snapshot dù repo tênhuyencanh. Không reveal key. AliasVITE_SUPABASE_PUBLISHABLE_KEY mới ưu tiên ANON, SDK hỗ trợ sb_publishable_; auth-config rejectserverkeys và giữpublicPreview. Callback vẫnPKCE /auth/callback exchange→/tai-khoan. Publicbuild xóa cảalias. Test8mới, toàn45unit/62integrationPASS cùngbuild/type/lint/format/scan. C sourcecopyhashD; backups/logs .oauth-evidence-20261026 trênC. Chưa push/deploy, productionloginNOT_TESTED. Không tự bỏAuthgate/đổiMFA/RLS/checkout/secret/ACL; cầnownercloudsetup và QA. Cậpnhật4reportsauphiên.
+
+---
+
 ## GitHub sync — 2026-10-26T00:10:36+07:00
 
 Repository https://github.com/dywab0411/huyen-canh nhánh main; source commit 881e7a812dad2337609bf73eb8ca91cba40341f4 push thường đã xác minh. Checkout push C:/Users/User/Downloads/boi/.github-sync-20261026; source chuẩn D:/boi. 179 files, source manifest và checks/ZIP trong .github-sync-evidence-20261026 ở C; full-history bundle huyen-canh-main-before-20261026.bundle đã verify. Git local D không reset/rebase hoặc thay remote.

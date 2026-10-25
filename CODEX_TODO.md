@@ -1,3 +1,9 @@
+## OAuth — 2026-10-26T02:30:32+07:00
+
+HC-AUTH001 PARTIAL: production build không có Supabase env. HC-AUTH002 BLOCKED: Auth/RLS production QA trước enable. HC-AUTH003 NOT_TESTED: login/callback/session thật. Đọc OAUTH_DIAGNOSIS.md. Local45unit/62integration/build/typecheck/lint/formatPASS; E2E không chạy lại. Source chưa push/deploy. Giữ cloud blockers và checkoutfalse.
+
+---
+
 ## GitHub sync — 2026-10-26T00:10:36+07:00
 
 - PASS: source commit 881e7a812dad2337609bf73eb8ca91cba40341f4 đã push main, ls-remote trùng; 179 source files, obsolete0. Backup bundle/ZIP ngoài Git.

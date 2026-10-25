@@ -73,3 +73,8 @@ Rà soát migration001–013, RLS/grants, Storage, OAuthPKCE, adminAAL2, lookup 
 ## 2026-10-26T00:10:36+07:00 — Đồng bộ GitHub main
 
 Sao lưu/verify Git bundle và ZIP trước thay đổi. Đồng bộ179file D sang checkout C, obsolete0; sourcecommit881e7a812dad2337609bf73eb8ca91cba40341f4 đãpushmain thường vàlsremote trùng. Format/lint/typecheck/unit37/integration62/publicbuild/artifact/secretsPASS; npmci retry sauENOTFOUND đạt0, audit0vulns; E2E không chạy lại. Cảnh báo whitespace giữ nguyên. Files thay đổi theo sync-manifest ngoàiGit. Khôngforce/đụngSupabase/checkout/deploy. Cậpnhật4báocáo, cloud/CIchưa nghiệmthu.
+
+
+## 2026-10-26T02:30:32+07:00 — OAuth chẩn đoán và cấu hình local
+
+Đọc production/Cloudflare/Supabase: authnull vì build thiếu env; provider không phải bước lỗi hiện tại. Sửa auth-config/auth/publicbuild, thêm8test và OAUTH_DIAGNOSIS. Unit45/integration62/build/publicbuild/artifact/type/lint/format/scanPASS; chưaE2Emới hoặc realGoogle. Chưa push/deploy/cloudchanges; Auth/RLS/checkoutgate giữ nguyên. Bốn báo cáo cậpnhật, backup/logC .oauth-evidence-20261026.

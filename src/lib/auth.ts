@@ -1,11 +1,16 @@
 import { publicPreview } from "./deployment";
 import { createClient } from "@supabase/supabase-js";
 import { ApiError } from "./api-error";
+import { authConfig, oauthCallback } from "./auth-config";
 const url = import.meta.env.VITE_SUPABASE_URL as string | undefined;
 const key = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined;
+const publishableKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as
+  string | undefined;
+const config = authConfig(publicPreview, url, publishableKey || key);
+export const authConfigurationIssue = config.reason;
 export const auth =
-  !publicPreview && url && key
-    ? createClient(url, key, {
+  config.reason === null
+    ? createClient(config.url, config.key, {
         auth: { flowType: "pkce", detectSessionInUrl: false },
       })
     : null;
@@ -16,7 +21,7 @@ export async function login() {
     );
   const { error } = await auth.auth.signInWithOAuth({
     provider: "google",
-    options: { redirectTo: location.origin + "/auth/callback" },
+    options: { redirectTo: oauthCallback(location.origin) },
   });
   if (error) throw error;
 }

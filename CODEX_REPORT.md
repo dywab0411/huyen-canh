@@ -1,3 +1,39 @@
+## Google OAuth production — 2026-10-26T02:30:32+07:00
+
+### A. Tổng quan
+PARTIAL / IN_PROGRESS. Chẩn đoán lỗi trước OAuth đã xác minh trực tiếp production; end-to-end đăng nhập production chưa VERIFIED. Source D:/boi có bản sửa local, chưa commit/push/deploy phiên OAuth. Project vẫn không production-ready, không tăng tỷ lệ hoàn thành cloud từ rubric cũ.
+
+### B. Việc thực hiện
+Đọc source/build/Callback và Dashboard Cloudflare/Supabase bằng Chrome. Bundle production200 index-c-3TpVsN.js không có Supabase URL/public key, login tối ưu thành throw; nút Google vẫn enabled, không gọi Google vì auth=null. Cloudflare có hai biến VITE dạng Secret, giá trị encrypted không reveal; buildlog không liệt kê chúng, artifact xác nhận cấu hình không vào build. Không biết giá trị rỗng/sai hoặc thời điểm thêm biến. Deployment4c3c481f commit3cd559c đúng snapshot, repo nay hiển thị dywab0411/huyencanh nên không kết luận sai repo. Code còn gate VITE_PUBLIC_PREVIEW_ONLY=true và public build chủ động bỏ keys; không tắt guard tự động.
+
+Files: src/lib/auth-config.ts mới (trim/env reason/publishable+legacy anon/server-key rejection), src/lib/auth.ts (alias VITE_SUPABASE_PUBLISHABLE_KEY ưu tiên tên ANON cũ, callback helper), tests/unit/auth-config.test.ts mới8tests, scripts/build-public-preview.mjs bỏ alias khỏi public build, OAUTH_DIAGNOSIS.md hướng dẫn Cloudflare chính xác. Copy/hash khớp checkout C đã test; backup D-before tại C:/Users/User/Downloads/boi/.oauth-evidence-20261026. Không hardcode key thật.
+
+### C. Kiểm tra chức năng
+PASS local: publishable format/legacy anon/config guard/PKCE URL bằng SDK thật, fixture giả và network bị chặn trong test. PARTIAL: OAuth code path. NOT_TESTED production: Google consent/login/session/logout/profile/history A/B, MFA/cloudRLS/Storage. Các nhóm ứng dụng giữ trạng thái báo cáo trước; không nghiệm thu thêm đơn/thanh toán/admin. Checkoutfalse, server PUBLIC_PREVIEW_ONLYtrue giữ nguyên.
+
+### D. Kiểm thử
+Checkout C:/Users/User/Downloads/boi/.github-sync-20261026, source đổi đã copy hash vào D. npm run format:check/lint/typecheck đều exit0; npm test45/45; npm run test:integration62/62; npm run build:public-preview0; npm run check:deploy0; npm run check:secrets0. npm run build với env publishable fixture + previewfalse exit0; không key thật, không request Supabase. Logs/checks.json ở .oauth-evidence-20261026 ngoài Git. E2E không chạy lại phiên OAuth, không coi SDK URL test là real OAuth. Cảnh báo chunk300kB vẫn còn. Không có build/lint/type lỗi cuối. Wrangler whoami chưa authenticated; Dashboard đọc được nhưng không đổi cloud. Production URL/browser và bundle đã kiểm trực tiếp, chưa hoàn tất login.
+
+### E. Lỗi/blocker
+- HC-AUTH001 P1 PARTIAL: production auth=null do build không có cấu hình Supabase; tái hiện /tai-khoan và nhấn Google. Hướng sửa: public build variables đúng tên, build thường, redeploy đúng source; chưa thao tác cloud.
+- HC-AUTH002 P1 BLOCKED: nghiệm thu Auth/profile/history RLS trước bật Auth production. Không bỏ publicPreview hoặc MFA để test đạt.
+- HC-AUTH003 P2 NOT_TESTED: session callback thực tế; code đi /auth/callback exchange rồi /tai-khoan; Supabase SiteURL đúng và allowlist /** đang bao phủ callback. Google provider bật theo chủ dự án, không coi là proof login thành công.
+- HC-SB/DEPLOY/RPT/ORD/BIRTH/LIB chưa nghiệm thu cloud giữ nguyên.
+
+### F. Còn thiếu
+Build env public values/redeployment và source mới trên production; chủ tài khoản tự login/consent và nghiệm thu session/A-B/logout. Không giả đã kiểm key project thật. Không đổi secret server, database hoặc policy. Script rejection chỉ ngăn dùng key quản trị tạo client, không làm key VITE trở thành secret: tuyệt đối không đặt admin key vào VITE.
+
+### G. Chủ dự án cần thao tác
+Cloudflare Production build variables: VITE_SUPABASE_URL và VITE_SUPABASE_ANON_KEY chứa public/publishable key (hoặc alias mới sau khi cập nhật source), dạng Text/build environment. Không gửi key qua chat. Build npm run build, outputdist. VITE_PUBLIC_PREVIEW_ONLY=false chỉ sau nghiệm thu Auth/RLS và xác nhận mở phần Auth. Giữ PUBLIC_PREVIEW_ONLY=true/CHECKOUT_ENABLED=false cho API thật. Callbackwebsite /auth/callback; Google callback là Supabase /auth/v1/callback. Chi tiết OAUTH_DIAGNOSIS.md, không tự redeploy trong phiên.
+
+### H. Tiếp theo
+Owner cấu hình public variables đúng build scope → xác nhận Auth/RLS → triển khai source đúng → login production thật → xác minh về /tai-khoan + logout/A-B → mới đánh VERIFIED. Không mở nhận đơn/payment.
+
+### I. Kiểm tra
+Production https://huyencanh.pages.dev/tai-khoan vẫn cần xác minh lại sau deployment. Local cd D:\boi; npm run dev -- --port 5173 --strictPort, kiểm PID trước start. /tai-khoan cần env và previewfalse; /admin vẫn membership+AAL2, không demo credentials. Không đổi ACL/pepper/ngân hàng hoặc Supabase data.
+
+---
+
 ## Đồng bộ GitHub main — 2026-10-26T00:10:36+07:00
 
 ### A. Tổng quan
