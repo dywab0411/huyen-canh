@@ -1,0 +1,52 @@
+{
+  "name": "huyen-canh",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "build": "tsc --noEmit && vite build",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "test": "vitest run tests/unit",
+    "test:integration": "vitest run tests/integration",
+    "test:e2e": "playwright test",
+    "worker:preview": "wrangler pages dev dist",
+    "video": "python video-template/render.py",
+    "check:secrets": "node scripts/scan.mjs",
+    "test:media": "python tests/media_test.py",
+    "test:worker": "node scripts/worker-smoke.mjs",
+    "verify:delivery": "node scripts/verify-delivery.mjs",
+    "format:check": "prettier --check src functions tests vite.config.ts playwright.config.ts eslint.config.js tsconfig.json package.json"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "2.118.0",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "react-router-dom": "7.18.4",
+    "zod": "4.6.7"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "4.14.0",
+    "@electric-sql/pglite": "0.5.11",
+    "@playwright/test": "1.64.1",
+    "@types/node": "24.9.1",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "@vitejs/plugin-react": "6.1.2",
+    "eslint": "10.13.0",
+    "lighthouse": "13.5.0",
+    "prettier": "3.9.10",
+    "typescript": "5.9.3",
+    "typescript-eslint": "8.72.0",
+    "vite": "8.3.5",
+    "vitest": "5.0.5",
+    "wrangler": "4.152.0"
+  },
+  "overrides": {
+    "undici": "7.30.1"
+  }
+}
