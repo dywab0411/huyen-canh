@@ -110,3 +110,10 @@ PASS_LOCAL = chỉ bằng chứng local ghi ở trên; PARTIAL/BLOCKED không đ
 ## Xác minh thư mục bàn giao
 
 `C:\Users\User\Downloads\boi`: fresh `npm ci`, typecheck, lint,26unit,19integration,build,secret scan đều PASS. Chi tiết `docs/CLEAN_WINDOWS_REPORT.json`. Đây là cài mới dependency trong thư mục bàn giao, không gọi là clone Git từ remote. Không thay trạng thái BLOCKED của cloud.
+
+## Xác minh thư mục bàn giao
+
+`D:\boi`: fresh `npm ci`, typecheck, lint,26unit,19integration,build,secret scan đều PASS. Chi tiết `docs/CLEAN_WINDOWS_REPORT.json`. Đây là cài mới dependency trong thư mục bàn giao, không gọi là clone Git từ remote. Không thay trạng thái BLOCKED của cloud.
+
+E2E đã chạy trực tiếp tại D:\boi sau fresh npm ci: 24/24 PASS. Log docs/D_E2E_LOG.txt và playwright-report/index.html. Không có test cloud credentials.
+

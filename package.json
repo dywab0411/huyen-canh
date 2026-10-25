@@ -20,7 +20,12 @@
     "test:media": "python tests/media_test.py",
     "test:worker": "node scripts/worker-smoke.mjs",
     "verify:delivery": "node scripts/verify-delivery.mjs",
-    "format:check": "prettier --check src functions tests vite.config.ts playwright.config.ts eslint.config.js tsconfig.json package.json"
+    "format:check": "prettier --check src functions tests vite.config.ts playwright.config.ts eslint.config.js tsconfig.json package.json",
+    "build:public-preview": "node scripts/build-public-preview.mjs",
+    "check:deploy": "node scripts/check-deploy.mjs",
+    "prepare:repository": "node scripts/prepare-repository.mjs",
+    "prepare:database": "node scripts/export-migrations.mjs",
+    "verify:public-preview": "node scripts/verify-public-preview.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "2.118.0",

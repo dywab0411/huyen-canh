@@ -5,6 +5,8 @@ export default ts.config(
       "dist/**",
       "node_modules/**",
       ".wrangler/**",
+      ".artifacts/**",
+      "release/**",
       "test-results/**",
       "playwright-report/**",
     ],

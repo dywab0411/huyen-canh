@@ -9,3 +9,19 @@
 - Không giả lập đăng nhập, đơn đã trả tiền hoặc đánh giá khách. Backend thiếu cấu hình fail closed. UI ghi rõ bản local.
 - PGlite chạy SQL Postgres thật local nhưng schema auth/storage trong test là fixture; không chứng minh remote OAuth/Storage, timing, concurrency nhiều isolate hoặc backup restore provider.
 - Video là minh họa vector raster tự vẽ kiểu anime, không dùng AI/API trả phí, 36s 720p không watermark. Âm thanh hợp âm do script tự tổng hợp, bật tay.
+
+
+## 2026-10-25 — Vòng nội dung và thư viện video
+Yêu cầu trực tiếp mới nhất gồm rà soát copy và CMS video; tài liệu dán kèm về đổi giá/QR/form/tra cứu là tài liệu tham khảo, không được coi là lệnh thực thi. Không áp dụng giá60k70k, thông tin ngân hàng/QR, hỗ trợ hoặc tra cứu một ô từ tài liệu đó. Giữ default10k20k50k, snapshot, 3 yếu tố lookup, manual confirmation và các guard hiện hành. CMS video được chủ dự án yêu cầu rõ, không mở rộng thành blog. Library customer posts yêu cầu quyền từng asset và riêng bản nội dung; editorial cần owner xác nhận không có dữ liệu khách. Xóa bài là soft-delete có audit, không tự chạy cleanup Storage khi retention chưa được chốt. Không deploy production.
+
+## 2026-10-25: yêu cầu giao diện mới nhất
+Chủ website yêu cầu bốn gói 10.000/20.000/60.000/70.000đ và bỏ SLA cố định, thay quy định ba gói trước đây cho đơn mới. Migration 011 chỉ thay danh mục bán, không sửa snapshot đơn cũ. QR gốc Sacombank do chủ website cung cấp được phép hiển thị; không dùng API tạo QR và không tự xác nhận tiền. Mã tra cứu HCX có 256 bit entropy, server lưu HMAC, không đặt URL. Đơn cũ vẫn cần xác thực đủ thông tin trước khi đổi mã. Tuổi không khai báo lưu unknown, không tự suy đoán đủ 18 tuổi.
+
+## 2026-10-25 — DEMO và ngày/giờ sinh
+DEMO chỉ Vite dev trên loopback, sessionStorage riêng không API/ảnh/ngân hàng thật, TTL1h và mã DEMO khác HCX. Không lưu tên/ngày sinh/giờ sinh trong DEMO. Đơn thật cần ngày sinh hợp lệ, giờ HH nullable, migration012 không backfill. Chi tiết sinh chỉ endpoint admin được auth+MFA hiện hữu, không list/public lookup. Hai câu video nguyên văn owner chỉ là nội dung hợp đồng; không tạo consent và không đổi gate public exact-revision.
+
+## 2026-10-25 — nhập ngày/tháng/năm và giờ/phút
+UI dùng DD/MM/YYYY tường minh độc lập locale, chuyển sang ISOYYYY-MM-DD cho API. Giờ nhập HH:mm24h, mặc định mở để có thể gõ ngay; rỗng hoặc Không rõ lưu null, không mặc định 00:00. Migration013 chỉ đổi validator cho lần gửi mới; đơn cũ HH giữ nguyên, admin hiển thị chưa có phút, không suy đoán.
+
+## 2026-10-25 — phát hành public-preview miễn phí
+Yêu cầu mới cho phép bản xem thử Internet thay quy định chưa deploy của các phiên trước. Cloudflare Pages+Functions same-origin, Supabase Free cho staging. Public build tắt Auth và form dữ liệu khách; middleware server chặn mọi POST/private API trước truy vấnDB, kể cả vô tình cấu hình credentials. _routes chỉ /api/* để static assets không chạyFunctions. QR nhận tiền không đưa vào artifact preview. Repo chuẩn bị local trên nhánhmain, không tự dựng danh tính Git, chưa tạo remote/private URL nếu chưa đăng nhập. Không đặt secrets trongGit hoặc VITE_ và không mởcheckout bằng thayprofile.

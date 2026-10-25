@@ -1,3 +1,11 @@
+# Cập nhật phát hành miễn phí — 25/10/2026
+
+Mã local đã có. Hướng dẫn mới nhất là [DEPLOY_FREE_GUIDE.md](DEPLOY_FREE_GUIDE.md); xem CODEX_REPORT/CODEX_TODO/CODEX_HANDOFF trước tài liệu lịch sử bên dưới. Chỉ profile public-preview được chuẩn bị cho Internet: không Auth/đơn/ảnh khách, checkout vẫn khóa. Chưa có URL công khai được xác minh. Dùng `npm run build:public-preview` và `npm run check:deploy` cho bản này; `npm run dev` vẫn giữ local DEMO.
+
+---
+
+## Tài liệu lịch sử giữ nguyên
+
 # Huyền Cảnh
 
 Bản local React/Vite + Cloudflare Pages Functions + migrations Supabase. Chưa phát hành hoặc nhận tiền thật.
