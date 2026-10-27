@@ -472,3 +472,14 @@ Commit 1f8750f đã push main thành công (normal push, không force). Producti
 
 ### Sau push/deploy — 2026-10-28T00:28:47.1681752+07:00
 Commit 74426ebf53fd0bc869e7f36e2e53dd75236fdff5 push main thành công, không force. HTTP production /tai-khoan nhận bundle /assets/index-DtmJACGI.js: có form admin/đặt mật khẩu, không còn chuỗi nút Google. /api/admin-login thử username giả trả 401, no-store; không gửi mật khẩu thật, không tạo session thành công. /api/config vẫn checkout=false/public_preview=true. Không xác minh DOM production vì CUA mất kết nối; HTTP/bundle không thay cho kiểm thử đăng nhập/session/MFA thật. Chưa đặt mật khẩu người dùng. Người dùng giữ phiên cũ, tự nhập mật khẩu và bấm Lưu mật khẩu; không đăng xuất trước bước này. Bốn báo cáo đã cập nhật, giữ lịch sử. Logs/bằng chứng ngoài Git .admin-login-20261028.
+
+
+### Sau commit/deploy và kiểm tra cloud — 2026-10-28T01:36:35+07:00
+Commit d0ae8434bc2340ed89a57c47cc360e8700c6bc84 push main thành công (không force). Public artifact /assets/index-BP6pH_Vj.js đã có login tối giản/workspace mới, không Google button; GETconfig checkout=false/publicpreview=true. Browser production /tai-khoan xác nhận chỉ Tài khoản/Mật khẩu/Đăng nhập, chụp account-production.png. /admin/dat-mat-khau trong phiên owner hiện có đã xác minh hiển thị hai ô password mới và nút lưu; đã bàn giao cho chủ tài khoản, agent không nhập credential.
+
+Cloud SQL chỉ đọc boolean xác nhận đúng một owner active và password_is_set=false; KHÔNG đọc hoặc lưu password/hash. Vì thế chưa thể login mật khẩu thành công, không đoán credentials hoặc dùng mật khẩu chat. Auth signup đã tắt; Email enabled, Google provider vẫn tạm bật cho phục hồi đến khi password mới nghiệm thu. Feature MANUAL_DELIVERY_ENABLED=false; chưa tạo/upload/result theo code thật qua endpoint mới, chưa khai báo app production hoàn tất.
+
+Migration014 đã apply với sự cho phép trực tiếp của chủ dự án, trong transaction; hai bảng RLS=true, anon/authenticated direct access=false, policies0, bucketprivate20MB. SQL Editor không tự ghi CLIledger, không run lại014/001–013. Ảnh/log/cloud-schema.json ngoàiGit tại .manual-simple-20261028 trênC. Bốn báo cáo giữ lịch sử và cập nhật thực tế; cần người dùng tự lưu mật khẩu mới rồi đăng nhập để tiếp tục bật riêng module thủ công và QA cloud, thanh toán luôn khóa.
+
+
+Lệnh local chính xác (sửa cách ghi liền tham số trong mục I): `npm run dev -- --port 5187`; `npm exec wrangler -- pages dev dist --port 8788 --ip 127.0.0.1`. Worker kiểm thử của vòng này đã được dừng, không dừng tiến trình khác.
