@@ -1,3 +1,16 @@
+## Sửa nhập nhầm tên tài khoản — 2026-10-28T01:58:48+07:00
+
+Browser production cho thấy usernameIsAdmin=false và ngay cả trim/lowercase vẫn không phải admin. Không đọc/ghi giá trị tên người dùng đã nhập hoặc mật khẩu. Đã điền lại alias admin trên form, không submit credential, không đổi password. Chưa xác minh đăng nhập thành công. Trang /admin/dat-mat-khau vẫn có phiên xác minh và form để chính chủ tài khoản tự nhập/lưu mật khẩu; agent không thực hiện bước thay credential.
+
+src/features/account/Account.tsx: cố định alias admin bằng hằng số và readonly input; submit luôn dùng alias server, tránh lỗi nhập nhầm/autofill. Không thay backend Auth, role, MFA legacy hoặc feature/payment guards. User yêu cầu đơn giản và tự chọn mật khẩu; không nhúng hoặc lưu giá trị mật khẩu vào source/Git/reports. Bước lưu password phải do người dùng tự nhập và bấm lưu trên website; không tuyên bố đã cài password.
+
+Regression mới tests/e2e/admin-login.spec.ts: trước sửa FAIL vì input editable(exit1); sau sửa một assertion fixture mong có API payload thất bại vì local auth null đóng an toàn, đã sửa test theo phạm vi UI readonly và xóa password sau lỗi, không bỏ guard Auth. Cuối cùng 3/3 targeted E2E PASS(exit0). Format/lint/typecheck/build/check:secrets exit0, 48 unit PASS, 78 integration PASS. Không chạy lại full53 E2E; vòng trước full52 PASS là lịch sử. Log .login-alias-20261028 trênC ngoàiGit.
+
+Cập nhật source/test và đủ bốn báo cáo, giữ lịch sử. Không thay database/Storage, không mở MANUAL_DELIVERY_ENABLED hoặc thanh toán, không reset người dùng. HC-SIMPLE001/002 vẫn PARTIAL/NOT_TESTED cloud password→CRUD→lookup. Tiếp theo: chủ tài khoản tự lưu mật khẩu và đăng nhập bằng admin, rồi kiểm chứng phiên thực trước bật riêng module và QA cloud. Không đoán/đọc password mới hoặc tái sử dụng credential chat trong code.
+
+
+---
+
 # Huyền Cảnh tối giản — 2026-10-28T01:30:59+07:00
 
 ## A. Tổng quan

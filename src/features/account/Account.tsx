@@ -13,8 +13,8 @@ export const profileSchema = z.object({
   age_band: z.enum(["16-17", "18+"]),
 });
 export function Account() {
-  const [username, setUsername] = useState("admin"),
-    [password, setPassword] = useState(""),
+  const username = "admin";
+  const [password, setPassword] = useState(""),
     [busy, setBusy] = useState(false),
     [message, setMessage] = useState("");
   const navigate = useNavigate();
@@ -48,7 +48,7 @@ export function Account() {
             value={username}
             required
             maxLength={80}
-            onChange={(e) => setUsername(e.target.value)}
+            readOnly
           />
         </label>
         <label>
