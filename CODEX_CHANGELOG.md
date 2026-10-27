@@ -116,3 +116,50 @@ Nguyên nhân đã xác định trong SDK cài đặt: Supabase auth-js thêm ti
 Regression tests/unit/mfa-qr.test.ts: 3 test tái hiện trước sửa đều FAIL (exit 1), sau sửa toàn bộ unit 48/48 PASS, integration 63/63 PASS. Format/lint/typecheck/build/check:secrets đều exit 0. Chưa chạy E2E QR tương tác trong vòng này; chưa xác minh QR mới hoặc mã TOTP thật trên production. Không lưu QR, OTP hoặc secret thật trong test/report. Bằng chứng lệnh/log ngoài Git .mfa-qr-fix-20261027 trên C.
 
 Trạng thái local PASS; production QR/AAL2 NOT_TESTED chờ deployment và chủ tài khoản tự thao tác. Chưa mở nhận đơn thật. Owner/backend đã cấu hình theo báo cáo vòng trước. Không tự thay chính sách hủy/hoàn hoặc retention trong bản sửa QR.
+
+
+### Xác minh sau push — 2026-10-27 23:58 +07
+Commit 1f8750f đã push main thành công (normal push, không force). Production HTTP 200 nhận bundle /assets/index-Ceyh27Jl.js có UI khôi phục mới; trình duyệt thực /tai-khoan sau reload hiển thị hai nút thiết lập/làm lại. Ảnh production-mfa-controls.png ngoài Git trong .mfa-qr-fix-20261027. Git integration đã đưa mã mới ra website; chưa đọc được deployment ID/build logs vì Dashboard tải chậm sau đăng nhập. QR enroll mới, reset factor thật và verify AAL2 vẫn NOT_TESTED: chủ tài khoản phải tự thao tác, không agent tạo/đọc OTP hoặc QR. Nhận đơn thật vẫn khóa. Không coi DOM mới là MFA hoàn tất.
+
+
+# Đăng nhập riêng cho admin — 2026-10-28T00:27:00+07:00
+
+## A. Tổng quan
+IN_PROGRESS. Source dựa trên commit 1f8750f, chưa nghiệm thu đăng nhập mật khẩu production. Bỏ khởi tạo Google login trên giao diện theo yêu cầu mới. Chưa mở nhận tiền, không thay đổi RLS/MFA hoặc dữ liệu đơn. Không tăng tỷ lệ hoàn thành vì còn gate cloud.
+
+## B. Công việc
+- src/features/account/Account.tsx: form tài khoản/mật khẩu, không prefill password; người đã đăng nhập tự đặt mật khẩu và mở /admin. MFA chỉ hiện sau đăng nhập. Giữ hồ sơ/lịch sử cũ, không xóa user.
+- src/lib/auth.ts: gọi POST /api/admin-login, setSession qua Supabase SDK; không signInWithOAuth.
+- functions/api/admin-login.ts: Origin/JSON/body limit/no-store, consume_limit, alias admin ánh xạ tới duy nhất một owner active từ DB server, xác thực mật khẩu bằng Supabase, kiểm UUID session trả về. Không chứa mật khẩu thật, không trả email/service key. Trường hợp nhiều owner đóng an toàn.
+- functions/_middleware.ts: chỉ ngoại lệ tuyến xác thực mới; guard admin/đơn/lookup giữ nguyên. src/main.tsx bỏ thông báo yêu cầu đăng nhập Google, giữ callback cũ tương thích phiên đang dở. Không tự tắt Google provider cloud trước nghiệm thu password.
+- ADMIN_LOGIN_SETUP.md, DECISIONS.md: cách chủ tài khoản tự đặt mật khẩu và quyết định mới. Không thêm backend thứ hai, không cần biến môi trường mới.
+
+## C. Chức năng
+| Hạng mục | Trạng thái thực tế |
+|---|---|
+| Form admin, không nút Google, password rỗng/ẩn | PASS E2E local |
+| Origin, giới hạn thử, membership, owner mơ hồ, token khác UUID, payload lớn | PASS integration mock |
+| Supabase mật khẩu thật/refresh session | NOT_TESTED cloud |
+| MFA AAL2, quyền admin và dữ liệu khách | Giữ cơ chế cũ; NOT_TESTED cloud vòng này |
+| Tạo đơn, tiền, trả bài và lookup production | BLOCKED/không mở checkout |
+| Dữ liệu hồ sơ/lịch sử/đơn cũ | Không migration/xóa; không tuyên bố cloud regression PASS |
+
+## D. Kiểm thử
+Format/lint/typecheck/unit/build/scan đều exit 0; unit 48/48, integration 70/70. Thêm 7 integration tests admin-login và 1 E2E form admin. Full E2E lần đầu trong sandbox không khởi động server, bị dừng (exit 1); retry đủ 47 bài có 46 PASS/1 FAIL do API proxy 127.0.0.1:8788 chưa chạy, JSON rỗng ở /api/config. Khởi động wrangler pages dev local với preview=true/checkout=false, chạy lại bài lỗi và bài admin mới: 2/2 PASS, exit 0. Không gọi full suite 47/47 một lượt PASS. Không giảm bảo mật hoặc sửa bài test cũ để che lỗi.
+
+Trong lúc đổi alias sang chọn một owner DB, fixture có 1 FAIL do vẫn mong 401 thay vì 503 khi không có owner; sửa kỳ vọng đúng fail-closed, sau đó toàn integration 70 PASS. Logs .admin-login-20261028 ngoài Git trên C. Cảnh báo chunk build và Vite proxy khi API chưa mở được ghi nhận. Kết nối browser CUA bị đóng nên chưa kiểm tra DOM production vòng này.
+
+## E. Lỗi/blocker
+HC-ADMIN001 P1 PARTIAL: người dùng phải tự đặt mật khẩu trong phiên Auth hiện có; agent chưa đặt hoặc kiểm tra mật khẩu thật. HC-ADMIN002 P1 NOT_TESTED: Email/password provider và sign-in/refresh/MFA thực tế trên Supabase. Nếu không còn phiên, dùng Dashboard recovery của đúng owner; không tự cấp admin mới.
+
+## F. Còn thiếu
+Cloud password QA, MFA, permission matrix đầy đủ, order/lookup/backup-restore và các blocker release cũ. Google provider cloud chưa tắt, UI không cung cấp Google login; chỉ tắt provider sau khi xác minh đường đăng nhập mật khẩu để tránh khóa owner. Không coi alias admin là đã có password.
+
+## G. Chủ dự án thực hiện
+Tự nhập mật khẩu vào mục Đặt mật khẩu cho tài khoản của bạn rồi Lưu mật khẩu. Không gửi lại mật khẩu/OTP. Giữ phiên cũ, thử đăng nhập admin trong cửa sổ riêng tư. Nếu Supabase tắt Email provider thì bật password sign-in; không cần bật đăng ký công khai. Không đổi ngân hàng, ACL hoặc khóa khác.
+
+## H. Tiếp theo
+Đồng bộ source D và GitHub theo phạm vi sửa; xác minh artifact public sau deploy, rồi chủ tài khoản tự đặt mật khẩu. Kiểm thử phiên/quyền cloud trước mở checkout. Không tự tắt MFA.
+
+## I. Kiểm tra
+D:/boi: npm run dev -- --port 5187; npm exec wrangler -- pages dev dist --port 8788 --ip 127.0.0.1 cho API local, không thêm cloud secrets vào fixture. /tai-khoan là form admin, /admin vẫn cần membership+AAL2. Hướng dẫn ADMIN_LOGIN_SETUP.md. Không có mật khẩu admin mặc định nhúng trong source.

@@ -8,6 +8,8 @@ export async function onRequest({ request, env, next }: Context) {
   if (env.PUBLIC_PREVIEW_ONLY !== "true") return next();
   const url = new URL(request.url);
   if (!url.pathname.startsWith("/api/")) return next();
+  // Authentication only: admin data and checkout remain guarded below.
+  if (url.pathname === "/api/admin-login") return next();
   const headers = {
     "Cache-Control": "no-store",
     "X-Content-Type-Options": "nosniff",

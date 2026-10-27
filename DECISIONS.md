@@ -25,3 +25,7 @@ UI dùng DD/MM/YYYY tường minh độc lập locale, chuyển sang ISOYYYY-MM-
 
 ## 2026-10-25 — phát hành public-preview miễn phí
 Yêu cầu mới cho phép bản xem thử Internet thay quy định chưa deploy của các phiên trước. Cloudflare Pages+Functions same-origin, Supabase Free cho staging. Public build tắt Auth và form dữ liệu khách; middleware server chặn mọi POST/private API trước truy vấnDB, kể cả vô tình cấu hình credentials. _routes chỉ /api/* để static assets không chạyFunctions. QR nhận tiền không đưa vào artifact preview. Repo chuẩn bị local trên nhánhmain, không tự dựng danh tính Git, chưa tạo remote/private URL nếu chưa đăng nhập. Không đặt secrets trongGit hoặc VITE_ và không mởcheckout bằng thayprofile.
+
+
+## 2026-10-28 — tài khoản chỉ dành admin
+Yêu cầu mới của owner thay Google UI bằng alias admin/mật khẩu. Giữ Supabase Auth, RLS, membership, MFA và dữ liệu cũ; không backend auth tự chế, không mật khẩu trong bundle. Alias server chỉ chọn một owner active; nếu cấu hình mơ hồ thì fail closed. Chưa tắt provider Google cloud trước nghiệm thu password để tránh mất tài khoản. Chủ tài khoản tự nhập mật khẩu bằng form authenticated, không agent cài credential.

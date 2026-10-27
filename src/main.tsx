@@ -440,7 +440,7 @@ function Tool() {
       data: { user },
     } = await auth.auth.getUser();
     if (!user) {
-      setMessage("Vui lòng đăng nhập Google trước khi chọn lưu.");
+      setMessage("Chức năng tài khoản hiện chỉ dành cho quản trị viên.");
       return;
     }
     const { error } = await auth.from("reading_history").insert({
@@ -591,12 +591,14 @@ function Tool() {
                 >
                   Chia sẻ công cụ
                 </button>
-                <button
-                  className="button secondary"
-                  onClick={() => void save()}
-                >
-                  Lưu vào tài khoản
-                </button>
+                {auth && (
+                  <button
+                    className="button secondary"
+                    onClick={() => void save()}
+                  >
+                    Lưu vào tài khoản
+                  </button>
+                )}
               </div>
             </article>
           )}
@@ -628,7 +630,7 @@ function Callback() {
   }, [navigate]);
   return (
     <section className="section narrow">
-      <h1>Đăng nhập Google</h1>
+      <h1>Phiên đăng nhập</h1>
       <p role="status">{message}</p>
     </section>
   );
