@@ -1,3 +1,82 @@
+# Huyền Cảnh tối giản — 2026-10-28T01:30:59+07:00
+
+## A. Tổng quan
+IN_PROGRESS; local READY_FOR_QA, cloud PARTIAL. Source dựa trên 74426eb; chưa tuyên bố đầy đủ production VERIFIED hoặc tăng tỷ lệ hoàn thành. Chủ dự án bỏ đăng ký khách/Google UI, chỉ cần admin → mã + chữ/video → tra cứu. Thanh toán giữ khóa. Migration014 đã được duyệt và áp dụng cloud; feature mới vẫn MANUAL_DELIVERY_ENABLED=false chờ mật khẩu mới và nghiệm thu thực tế. Không cần chốt hoàn tiền để dùng workflow thủ công miễn thanh toán này; blocker hoàn tiền cũ chỉ thuộc checkout cũ.
+
+## B. Đã thực hiện
+- src/features/account/Account.tsx: chỉ admin/mật khẩu/nút Đăng nhập/lỗi ngắn; không hồ sơ/Google/TOTP/hướng dẫn kỹ thuật. Bỏ CTA lưu lịch sử khách và đổi link điều hướng thành Quản trị. Không xóa dữ liệu khách cũ.
+- src/features/manual/ManualAdmin.tsx: tạo mã server, danh sách 50 mục/trang, soạn/sửa chữ, chọn/tải MP4≤20MB, lưu với version, xóa mềm. Bản nháp không lookup; request_id tránh tạo trùng khi retry.
+- src/features/manual/ManualLookup.tsx: một mã, không login; text escaped, video riêng tư, xóa nội dung cũ khi đổi mã, chống response cũ ghi vào mã mới.
+- functions/api/delivery.ts: Origin/JSON/body limit, getUser xác minh JWT + password AMR + owner active, không dựa role client; capability256bit/HMAC/lookup rate limit, Storage PRIVATE và file size check, reservation theo đơn/magic MP4, signed read60s, version409, lookup không trả row IDs/codehash/paths. Workflow mới không yêu cầu TOTP; API paid cũ vẫn giữ MFA/guards.
+- supabase/migrations/202610280014_manual_delivery.sql: hai bảng RLS, revoke anon/authenticated, service_role server-only, private bucket manual-results20MB. Chủ dự án đã cho phép apply riêng014 bằng BEGIN/COMMIT; không run lại001–013, không sửa/xóa orders/Auth users cũ. Cloud metadata xác minh cả hai bảng RLS=true, anon_any_access=false, authenticated_any_access=false, policies0; bucket public=false/20971520 bytes.
+- Supabase Dashboard: đã tắt Allow new users to sign up, giữ Email enabled. Google provider còn bật tạm thời để không khóa đường phục hồi trước mật khẩu mới; không còn Google button hoặc customer signup UI. Không xóa identities/MFA factors.
+- Trang riêng /admin/dat-mat-khau cho chủ tài khoản tự đổi mật khẩu trong phiên đã xác minh/recovery; xóa fragment token trước xác minh, không prefill/ghi secret. SIMPLE_ADMIN_SETUP.md hướng dẫn Dashboard, migrations/activation/rollback. Mật khẩu từng chia sẻ phải thay; agent chưa tự đặt credential.
+- README_START_HERE, AGENTS, DECISIONS, IMPLEMENTATION_STATUS, ADMIN_LOGIN_SETUP, export-migrations, wrangler và các tests cập nhật tương ứng. Old lookup giữ /tra-cuu-cu; DEMO cũ chỉ DEV. Không thêm dịch vụ trả phí.
+
+## C. Kiểm tra chức năng
+| Hạng mục | Local | Cloud |
+|---|---|---|
+| Form login tối giản, lỗi ngắn, không customer UI | PASS E2E | Chờ deploy mới |
+| Owner/password backend, anon/non-owner/OAuth bị chặn | PASS integration fixture | NOT_TESTED password session thật |
+| Tạo mã/retry/list/nháp | PASS integration+E2E mock | NOT_TESTED |
+| Lưu/sửa/xóa mềm/version409 | PASS integration+E2E mock | NOT_TESTED |
+| Upload MP4/private path/magic/public-bucket refusal | PASS integration fixture; UI input PASS | NOT_TESTED upload Storage thật |
+| Tra cứu đúng/sai/nháp/xóa/text an toàn | PASS integration+E2E mock | NOT_TESTED endpoint live |
+| Phát video | PASS browser sample MP436s trong test | NOT_TESTED video private cloud |
+| RLS bảng mới và private bucket | PASS PGlite | PASS metadata cloud, không phải full API permission matrix |
+| Khách không đăng ký | Không UI signup | PASS Dashboard switch saved off |
+| Thanh toán | Guards cũ regression PASS | Không mở checkout |
+| Đổi mật khẩu qua email hồi phục | Chặn form khi không session PASS E2E | NOT_TESTED, cần chủ tài khoản |
+
+## D. Kiểm thử
+48 unit PASS, 78 integration PASS, full52 E2E PASS(exit0); trước đó full51 và targeted5 cũng đạt. 8 test mới integration:7 API fixture+1 PGlite RLS/migration;5 E2E mới cho form/admin/lookup/denied/recovery. Regression G20 đã kiểm từ vòng trước được đưa kèm để bảo vệ đơn paid cũ. Không bịa fixture thành cloud upload/sign-in PASS.
+
+| Lệnh | Exit |
+|---|---:|
+| `npm run format:check` | 0 |
+| `npm run lint` | 0 |
+| `npm run typecheck` | 0 |
+| `npm run test` | 0 |
+| `npm run test:integration` | 0 |
+| `npm run build` | 0 |
+| `npm run check:secrets` | 0 |
+| `npm run prepare:database` | 0 |
+| `npm run test:e2e` (full cuối) | 0 |
+| `npm run test:e2e -- --grep minimal/account/admin/lookup/password` (targeted5) | 0 |
+
+Các lỗi trong lúc triển khai đã sửa: lint hàm Admin cũ không dùng/prefer-const; lỗi cú pháp ghép effect trang đặt mật khẩu khiến format/type/build fail trước khi sửa. Sau sửa đã chạy lại toàn bộ format/lint/type/unit/integration/build/scan và full E2E. Cảnh báo chunk build/NO_COLOR còn; không phải test failure. Lần đọc git diff ở thư mục cha không phải repo đã sửa sang checkout; không phải lỗi app. Logs/screenshots ngoài Git C:/Users/User/Downloads/boi/.manual-simple-20261028. Ảnh admin/lookup mang fixture, không phải đơn khách thật.
+
+## E. Lỗi/blocker
+HC-SIMPLE001 P1 BLOCKED: chưa có mật khẩu mới được chủ tài khoản tự đặt/nghiệm thu; MANUAL_DELIVERY_ENABLED=false. Không dùng lại mật khẩu chat. HC-SIMPLE002 P1 NOT_TESTED: cloud login→create→upload→save→lookup→edit→delete, signed URL expiry và permission matrix HTTP. HC-SIMPLE003 P2: upload dở/video cũ còn PRIVATE; chưa dọn tự động, cần theo dõi quota Free. Xóa mềm không thu hồi link đã ký ngay, tối đa60s. Magic ftyp không xác minh mọi codec/virus; chưa có scanner, không gọi scannerPASS.
+
+## F. Còn thiếu
+Thử mật khẩu mới, recovery email, private upload/playback thực tế và nghiệm thu endpoint cloud sau activation có kiểm soát; Google provider cloud cần tắt sau khi password ổn. Quota Supabase Free hữu hạn, không bảo đảm lưu vô hạn. Không thay các tính năng ngoài phạm vi để đóng blocker cũ giả tạo. Feature flag hiện tắt, không coi UI triển khai là dịch vụ sử dụng được đầy đủ.
+
+## G. Chủ dự án thực hiện
+Chủ tài khoản tự đặt mật khẩu mới qua Dashboard Send password recovery hoặc phiên đã xác minh tại /admin/dat-mat-khau; không gửi mật khẩu/OTP/link recovery vào chat. Migration014 đã apply, KHÔNG chạy lại. Không cần cấp lại owner hoặc ngân hàng. Hướng dẫn từng bước SIMPLE_ADMIN_SETUP.md. Sau xác nhận password mới có thể bật riêng workflow thủ công để QA, giữ paid checkout khóa.
+
+## H. Tiếp theo
+Đồng bộ source D, commit/push có chọn lọc, kiểm artifact public. Chủ tài khoản đặt mật khẩu mới, đăng nhập; bật MANUAL_DELIVERY_ENABLED riêng và kiểm cloud với dữ liệu giả/permission đầy đủ trước tuyên bố hoàn tất. Không nới RLS, không xóa Auth user, không run lại migrations001–014, không thay secrets/pepper/ACL. SQL Editor chưa reconcile CLI ledger.
+
+## I. Kiểm tra
+D:/boi: npm run dev -- --port5187; build rồi npm exec wrangler -- pages dev dist --port8788 --ip127.0.0.1 cho API local; test chạy qua Playwright config. /tai-khoan login, /admin workspace, /tra-cuu một mã. Không có credential mặc định trong source. Cloud mới vẫn flagfalse; sourceguide mô tả cách activate/rollback bằng Git để tương thích Wrangler-managed Pages.
+
+
+---
+
+## Kiểm tra đăng nhập thật — 2026-10-28T00:37:58+07:00
+
+Trạng thái HC-ADMIN001/002: PARTIAL/BLOCKED mật khẩu thật, KHÔNG PASS đăng nhập. Browser production Chrome /tai-khoan nhập alias admin thành công, form không crash; thử đúng thông tin do chủ dự án cung cấp một lần, nhận thông báo Tài khoản hoặc mật khẩu không đúng, vẫn ở form login và không có link quản trị. Không lưu mật khẩu vào file/log/report. Không nhận được session thành công. Phản hồi này chưa phân biệt sai mật khẩu, password chưa được đặt hay cấu hình Email/password provider; không bịa nguyên nhân provider cụ thể.
+
+Bản sửa trước chỉ tạo form/endpoint; agent CHƯA thiết lập mật khẩu thật trên Supabase. Vì thế không thể coi alias admin là credential đã sẵn sàng. Phiên IAB đang đăng nhập từ trước vẫn còn, có form Đặt mật khẩu cho tài khoản của bạn; đã giữ phiên này, không đăng xuất, không xóa user/factor, không đổi mật khẩu bằng agent. Chủ tài khoản cần tự nhập và lưu mật khẩu trong phiên đó rồi thử lại; đây là bước thay credential cần người dùng trực tiếp thao tác. MFA và checkout guards giữ nguyên.
+
+PASS browser nhập username không lỗi; FAIL đăng nhập bằng thông tin được cung cấp trong lần thử này; NOT_TESTED đăng nhập thành công/refresh/AAL2. Bằng chứng screenshot login-rejected.png ngoài Git tại C:/Users/User/Downloads/boi/.admin-retest-20261028. Không sửa app hoặc deploy trong vòng kiểm tra này. Không chạy lại format/lint/typecheck/build/unit/integration/E2E vì không thay mã nguồn; số test vòng trước là lịch sử, không tính PASS mới.
+
+Đã cập nhật bốn báo cáo, giữ lịch sử. Tiếp theo: chủ tài khoản tự Lưu mật khẩu tại https://huyencanh.pages.dev/tai-khoan (không đăng xuất trước), rồi kiểm tra lại đăng nhập/session bằng phiên riêng. Nếu Supabase báo lỗi khi lưu, ghi đúng thông báo để xử lý; không bypass Auth/RLS/MFA hoặc dùng mật khẩu nhúng.
+
+
+---
+
 # Đăng nhập riêng cho admin — 2026-10-28T00:27:00+07:00
 
 ## A. Tổng quan
@@ -389,3 +468,7 @@ Quyền dashboard staging Google/Supabase/Cloudflare, exact redirect/origin, own
 
 ### Xác minh sau push — 2026-10-27 23:58 +07
 Commit 1f8750f đã push main thành công (normal push, không force). Production HTTP 200 nhận bundle /assets/index-Ceyh27Jl.js có UI khôi phục mới; trình duyệt thực /tai-khoan sau reload hiển thị hai nút thiết lập/làm lại. Ảnh production-mfa-controls.png ngoài Git trong .mfa-qr-fix-20261027. Git integration đã đưa mã mới ra website; chưa đọc được deployment ID/build logs vì Dashboard tải chậm sau đăng nhập. QR enroll mới, reset factor thật và verify AAL2 vẫn NOT_TESTED: chủ tài khoản phải tự thao tác, không agent tạo/đọc OTP hoặc QR. Nhận đơn thật vẫn khóa. Không coi DOM mới là MFA hoàn tất.
+
+
+### Sau push/deploy — 2026-10-28T00:28:47.1681752+07:00
+Commit 74426ebf53fd0bc869e7f36e2e53dd75236fdff5 push main thành công, không force. HTTP production /tai-khoan nhận bundle /assets/index-DtmJACGI.js: có form admin/đặt mật khẩu, không còn chuỗi nút Google. /api/admin-login thử username giả trả 401, no-store; không gửi mật khẩu thật, không tạo session thành công. /api/config vẫn checkout=false/public_preview=true. Không xác minh DOM production vì CUA mất kết nối; HTTP/bundle không thay cho kiểm thử đăng nhập/session/MFA thật. Chưa đặt mật khẩu người dùng. Người dùng giữ phiên cũ, tự nhập mật khẩu và bấm Lưu mật khẩu; không đăng xuất trước bước này. Bốn báo cáo đã cập nhật, giữ lịch sử. Logs/bằng chứng ngoài Git .admin-login-20261028.

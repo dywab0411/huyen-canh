@@ -1,3 +1,9 @@
+# Cập nhật 28/10/2026: hệ thống tối giản
+
+Đọc SIMPLE_ADMIN_SETUP.md và bốn CODEX reports mới nhất. UI chính: /tai-khoan đăng nhập admin, /admin tạo mã/soạn chữ/video, /tra-cuu khách xem theo mã. Thanh toán vẫn khóa. Migration014 và mật khẩu mới/QA cloud là điều kiện mở chức năng thật; không chạy lại migrations001–013. Tài liệu yêu cầu cũ bên dưới giữ để truy vết, yêu cầu mới của chủ website có ưu tiên.
+
+---
+
 # Cập nhật phát hành miễn phí — 25/10/2026
 
 Mã local đã có. Hướng dẫn mới nhất là [DEPLOY_FREE_GUIDE.md](DEPLOY_FREE_GUIDE.md); xem CODEX_REPORT/CODEX_TODO/CODEX_HANDOFF trước tài liệu lịch sử bên dưới. Chỉ profile public-preview được chuẩn bị cho Internet: không Auth/đơn/ảnh khách, checkout vẫn khóa. Chưa có URL công khai được xác minh. Dùng `npm run build:public-preview` và `npm run check:deploy` cho bản này; `npm run dev` vẫn giữ local DEMO.

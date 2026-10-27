@@ -42,3 +42,7 @@ Yêu cầu mới nhất cho phép hiển thị bản QR ngân hàng gốc do ch�
 
 ## 2026-10-25 — chuẩn bị Internet miễn phí
 Chủ dự án hiện cho phép triển khai bản xem thử nếu đủ quyền. Chỉ profile public-preview được công khai trước nghiệm thu cloud: VITE_PUBLIC_PREVIEW_ONLY=true, PUBLIC_PREVIEW_ONLY=true, CHECKOUT_ENABLED=false. Không mở Auth/đơn/lookup/ảnh/video khách hoặc nhận tiền thật. Thiếu đăng nhập dừng đúng bước đó, không dùng tài khoản temporary hoặc đoán credentials. Không nâng cấp trả phí, thêm thẻ hoặc đổiACL. Giữ bản local normal/DEMO và lịch sử.
+
+
+## 2026-10-28 — yêu cầu mới: vận hành tối giản
+UI /tai-khoan chỉ admin/mật khẩu; /admin soạn chữ/video và mã; /tra-cuu một mã không login. Không signup khách hoặc Google button. Module thủ công dùng Supabase Auth password + owner check backend, manual feature flag riêng; không hạ MFA/checkout của module paid cũ. Migration014 additive và private bucket, chỉ apply cloud sau xác nhận. Mật khẩu từng chia sẻ phải đổi, không agent nhập credential mới hoặc commit password. Giữ dữ liệu paid/legacy và thanh toán khóa. SIMPLE_ADMIN_SETUP.md là hướng dẫn mới nhất cho module này.

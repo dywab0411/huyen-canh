@@ -176,7 +176,7 @@ test("new order shows separate payment reference and one-field capability; claim
 test("lookup default has exactly one secret input; legacy flow stays separate and visible only by choice", async ({
   page,
 }) => {
-  await page.goto("/tra-cuu");
+  await page.goto("/tra-cuu-cu");
   await expect(page.locator("main input:visible")).toHaveCount(1);
   await expect(
     page.getByLabel("Mã bảo mật tra cứu", { exact: true }),

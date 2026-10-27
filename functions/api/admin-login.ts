@@ -120,14 +120,10 @@ export async function onRequest({
     });
     if (error || !data.session || data.user?.id !== ownerId)
       return reply(401, "Tài khoản hoặc mật khẩu không đúng.");
-    return reply(
-      200,
-      "Đã đăng nhập. Quyền quản trị vẫn yêu cầu xác minh MFA.",
-      {
-        access_token: data.session.access_token,
-        refresh_token: data.session.refresh_token,
-      },
-    );
+    return reply(200, "Đã đăng nhập.", {
+      access_token: data.session.access_token,
+      refresh_token: data.session.refresh_token,
+    });
   } catch {
     return reply(400, "Chưa thể đăng nhập. Vui lòng thử lại.");
   }

@@ -4,7 +4,7 @@ test("account offers only admin credentials and never prefills a password", asyn
 }) => {
   await page.goto("/tai-khoan");
   await expect(
-    page.getByRole("heading", { name: "Tài khoản quản trị", exact: true }),
+    page.getByRole("heading", { name: "Đăng nhập quản trị", exact: true }),
   ).toBeVisible();
   await expect(
     page.getByRole("button", { name: "Đăng nhập bằng Google", exact: true }),

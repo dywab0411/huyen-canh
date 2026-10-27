@@ -20,7 +20,7 @@ export function HomeSections() {
             [
               "⌂",
               "Một khoảng riêng của bạn",
-              "Xem miễn phí không cần tài khoản. Bạn chủ động lưu lịch sử và quyết định nội dung nào có thể được chia sẻ.",
+              "Xem miễn phí không cần tài khoản. Giữ riêng mã tra cứu để bảo vệ nội dung dành cho bạn.",
             ],
           ].map(([icon, title, text]) => (
             <article className="panel" key={title}>

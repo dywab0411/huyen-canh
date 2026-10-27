@@ -6,3 +6,6 @@ pages_build_output_dir = "dist"
 [vars]
 PUBLIC_PREVIEW_ONLY = "true"
 CHECKOUT_ENABLED = "false"
+
+# Enable only after migration 014, new admin password and access QA.
+MANUAL_DELIVERY_ENABLED = "false"

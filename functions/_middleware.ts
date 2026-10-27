@@ -1,7 +1,7 @@
 import { defaults } from "../src/lib/packages";
 type Context = {
   request: Request;
-  env: { PUBLIC_PREVIEW_ONLY?: string };
+  env: { PUBLIC_PREVIEW_ONLY?: string; MANUAL_DELIVERY_ENABLED?: string };
   next: () => Promise<Response>;
 };
 export async function onRequest({ request, env, next }: Context) {
@@ -10,6 +10,11 @@ export async function onRequest({ request, env, next }: Context) {
   if (!url.pathname.startsWith("/api/")) return next();
   // Authentication only: admin data and checkout remain guarded below.
   if (url.pathname === "/api/admin-login") return next();
+  if (
+    url.pathname === "/api/delivery" &&
+    env.MANUAL_DELIVERY_ENABLED === "true"
+  )
+    return next();
   const headers = {
     "Cache-Control": "no-store",
     "X-Content-Type-Options": "nosniff",

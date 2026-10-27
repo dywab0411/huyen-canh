@@ -29,3 +29,7 @@ Yêu cầu mới cho phép bản xem thử Internet thay quy định chưa deplo
 
 ## 2026-10-28 — tài khoản chỉ dành admin
 Yêu cầu mới của owner thay Google UI bằng alias admin/mật khẩu. Giữ Supabase Auth, RLS, membership, MFA và dữ liệu cũ; không backend auth tự chế, không mật khẩu trong bundle. Alias server chỉ chọn một owner active; nếu cấu hình mơ hồ thì fail closed. Chưa tắt provider Google cloud trước nghiệm thu password để tránh mất tài khoản. Chủ tài khoản tự nhập mật khẩu bằng form authenticated, không agent cài credential.
+
+
+## 2026-10-28 — phạm vi tối giản được chủ website chốt
+Chỉ UI đăng nhập admin, soạn chữ/video và mã tra cứu. Dùng Supabase Auth + owner membership kiểm backend; riêng workflow thủ công mới yêu cầu session password, không yêu cầu TOTP trên UI này. API paid/legacy giữ nguyên MFA; thanh toán luôn khóa. Hai bảng/bucket private mới tách khỏi đơn cũ để bảo toàn dữ liệu/snapshot. Tra cứu dùng capability 256 bit qua POST, link video60s; xóa mềm/version guard/idempotency. Mở cloud phụ thuộc migration014 được duyệt, đổi mật khẩu đã chia sẻ và QA quyền thực tế, featureflag mặc định false. Khách không có đăng ký/hồ sơ trên giao diện. /tra-cuu-cu giữ quyền truy cập đơn cũ, không đưa lên điều hướng chính. Chỉ DEV giữ demo cũ.

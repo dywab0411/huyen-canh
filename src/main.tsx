@@ -1,6 +1,6 @@
 import { publicPreview } from "./lib/deployment";
 import { PublicPreviewNotice } from "./features/PublicPreviewNotice";
-import React, { useEffect, useState, lazy, Suspense } from "react";
+import React, { useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
 import {
   BrowserRouter,
@@ -26,18 +26,18 @@ import { LookupPage } from "./features/orders/LookupPage";
 import { SupportContacts } from "./features/orders/PaymentInfo";
 import { uiRevision } from "./lib/site-info";
 import { Account } from "./features/account/Account";
-import { auth, api } from "./lib/auth";
+import { ManualAdmin } from "./features/manual/ManualAdmin";
+import { ManualLookup } from "./features/manual/ManualLookup";
+import {
+  SetAdminPassword,
+  RecoveryRedirect,
+} from "./features/manual/SetAdminPassword";
+import { auth } from "./lib/auth";
 import { saveImage, shareLink } from "./lib/share";
 import "./style.css";
 import { PublicGallery } from "./features/library/PublicGallery";
 import type { Dataset } from "./content/dataset";
 import { OrderPage } from "./features/orders/OrderPage";
-
-const AdminWorkspace = lazy(() =>
-  import("./features/admin/Workspace").then((m) => ({
-    default: m.AdminWorkspace,
-  })),
-);
 
 function LotusScene() {
   return (
@@ -429,33 +429,6 @@ function Tool() {
       setBusy(false);
     }
   }
-  async function save() {
-    if (!auth) {
-      setMessage(
-        "Chưa cấu hình tài khoản. Không lưu hoặc tải lịch sử khách lên máy chủ.",
-      );
-      return;
-    }
-    const {
-      data: { user },
-    } = await auth.auth.getUser();
-    if (!user) {
-      setMessage("Chức năng tài khoản hiện chỉ dành cho quản trị viên.");
-      return;
-    }
-    const { error } = await auth.from("reading_history").insert({
-      user_id: user.id,
-      tool: result!.toolId,
-      snapshot: result,
-      engine_version: result!.engineVersion,
-      dataset_version: result!.datasetVersion,
-    });
-    setMessage(
-      error
-        ? "Chưa lưu được lịch sử. Vui lòng thử lại."
-        : "Đã lưu vào tài khoản của bạn.",
-    );
-  }
   return (
     <section className="section tool-page">
       <Link className="text-link" to="/kham-pha">
@@ -591,14 +564,6 @@ function Tool() {
                 >
                   Chia sẻ công cụ
                 </button>
-                {auth && (
-                  <button
-                    className="button secondary"
-                    onClick={() => void save()}
-                  >
-                    Lưu vào tài khoản
-                  </button>
-                )}
               </div>
             </article>
           )}
@@ -632,49 +597,6 @@ function Callback() {
     <section className="section narrow">
       <h1>Phiên đăng nhập</h1>
       <p role="status">{message}</p>
-    </section>
-  );
-}
-function Admin() {
-  const [role, setRole] = useState("");
-  const [message, setMessage] = useState(
-    "Chưa xác minh quyền máy chủ. Không có dữ liệu khách được tải.",
-  );
-  return (
-    <section className="section narrow">
-      <p className="eyebrow">KHÔNG GIAN VẬN HÀNH</p>
-      <h1>Quản trị Huyền Cảnh</h1>
-      <div className="panel">
-        <p>
-          Quyền owner/editor được kiểm tra tại máy chủ trong mỗi yêu cầu. Thao
-          tác nhạy cảm cần MFA.
-        </p>
-        <button
-          className="button"
-          onClick={() =>
-            void api("admin/session", {})
-              .then((r) => {
-                setRole(String(r.role));
-                setMessage("Phiên đã xác minh.");
-              })
-              .catch((e) => setMessage(e.message))
-          }
-        >
-          Kiểm tra quyền quản trị
-        </button>
-        <p role="status">{message}</p>
-        {role ? (
-          <Suspense fallback={<p>Đang tải không gian quản trị…</p>}>
-            <AdminWorkspace role={role} />
-          </Suspense>
-        ) : (
-          <p className="notice">
-            Chưa kết nối phiên quản trị. Không nhập dữ liệu khách thật. Đối soát
-            và soạn bài chỉ mở sau xác minh server + MFA. Upload và quản lý
-            consent công khai đang khóa chờ bộ kiểm định tệp.
-          </p>
-        )}
-      </div>
     </section>
   );
 }
@@ -726,7 +648,7 @@ const policy: Record<string, [string, string[]]> = {
   "rieng-tu": [
     "Chính sách riêng tư — bản chờ chốt",
     [
-      "Công cụ miễn phí xử lý dữ liệu ngay trên thiết bị. Không có analytics, quảng cáo hoặc dịch vụ AI nhận nội dung nhập. Bạn chủ động chọn lưu vào tài khoản khi cấu hình tài khoản đã sẵn sàng.",
+      "Công cụ miễn phí xử lý dữ liệu ngay trên thiết bị. Không có analytics, quảng cáo hoặc dịch vụ AI nhận nội dung nhập. Không cần đăng ký tài khoản khách để sử dụng.",
       "Đơn hàng thu họ tên, giới tính, ngày sinh, giờ sinh nếu biết, số điện thoại và gói dịch vụ; thông tin người thứ hai, lời nhắn và ảnh là tùy chọn. Ảnh chỉ được tải lên khi người gửi xác nhận quyền sử dụng, sự đồng ý tự nguyện và mọi người có thể nhận diện trong ảnh đủ 18 tuổi. Kết quả và tệp đặt trong kho riêng. Quyền dùng ảnh, website, YouTube và TikTok tách riêng, mặc định tắt và gắn bản cuối cụ thể. Bài đăng thư viện có video, ảnh bìa, tiêu đề và lời gửi chỉ công khai khi có quyền phù hợp cho từng tệp và đúng phiên bản nội dung đã xem; sửa bài cần đồng ý lại. Đường dẫn tệp đã cấp có thể còn hiệu lực tối đa 60 giây sau khi thu hồi.",
       "Dự kiến lưu đơn/kết quả đã trả tiền 180 ngày sau giao, ảnh nguồn 30 ngày, đơn chưa thanh toán 30 ngày sau hết hạn; owner phải chốt trước live. Bản sao lưu luân chuyển 30 ngày và áp lại yêu cầu xóa khi khôi phục.",
       "Người 16–17 không cung cấp ảnh nhận diện hoặc công khai video cá nhân trong bản đầu. Thu hồi consent gỡ thư viện do website kiểm soát; nền tảng ngoài cần thao tác thủ công. Không bảo đảm xóa bản đã được người khác tải. Kênh yêu cầu xóa/hỗ trợ đang chờ owner cung cấp.",
@@ -859,7 +781,7 @@ function App() {
           <NavLink to="/tra-cuu">Tra cứu</NavLink>
         </nav>
         <Link className="account-link" to="/tai-khoan">
-          Góc của bạn ↗
+          Quản trị ↗
         </Link>
       </header>
 
@@ -881,7 +803,16 @@ function App() {
           />
           <Route
             path="/tra-cuu"
-            element={publicPreview ? <PublicPreviewNotice /> : <LookupPage />}
+            element={
+              publicPreview ? (
+                <PublicPreviewNotice />
+              ) : import.meta.env.DEV &&
+                new URLSearchParams(location.search).get("demo") === "1" ? (
+                <LookupPage />
+              ) : (
+                <ManualLookup />
+              )
+            }
           />
           <Route
             path="/tai-khoan"
@@ -897,8 +828,10 @@ function App() {
           />
           <Route
             path="/admin"
-            element={publicPreview ? <PublicPreviewNotice /> : <Admin />}
+            element={publicPreview ? <PublicPreviewNotice /> : <ManualAdmin />}
           />
+          <Route path="/admin/dat-mat-khau" element={<SetAdminPassword />} />
+          <Route path="/tra-cuu-cu" element={<LookupPage />} />
           <Route path="/thu-vien" element={<Gallery />} />
           <Route path="/video-mau" element={<SampleVideo />} />
           <Route path="/chinh-sach/:slug" element={<Policy />} />
@@ -959,6 +892,7 @@ function App() {
 createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <BrowserRouter>
+      <RecoveryRedirect />
       <App />
     </BrowserRouter>
   </React.StrictMode>,

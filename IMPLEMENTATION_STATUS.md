@@ -117,3 +117,7 @@ PASS_LOCAL = chỉ bằng chứng local ghi ở trên; PARTIAL/BLOCKED không đ
 
 E2E đã chạy trực tiếp tại D:\boi sau fresh npm ci: 24/24 PASS. Log docs/D_E2E_LOG.txt và playwright-report/index.html. Không có test cloud credentials.
 
+
+
+## 2026-10-28 — SIMPLE-ADMIN local
+Module thủ công tách biệt đơn thanh toán: login tối giản, password owner backend, tạo mã256bit/idempotency, text/privateMP4, lookup POST, version409 và xóa mềm. Local unit/integration/E2E theo báo cáo mới. Chưa đạt gate cloud: migration014 đã được xác nhận/apply cloud với RLS/private bucket, mật khẩu mới cần chủ tài khoản tự đặt, signed upload/lookup cloud chưa nghiệm thu; MANUAL_DELIVERY_ENABLED=false, paid checkoutfalse. Không đánh dấu full production VERIFIED.

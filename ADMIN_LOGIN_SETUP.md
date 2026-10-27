@@ -1,3 +1,9 @@
+# Hướng dẫn mới nhất: SIMPLE_ADMIN_SETUP.md
+
+Nội dung dưới đây là lịch sử trước yêu cầu tối giản 28/10/2026. Không dùng để mở checkout hoặc yêu cầu TOTP cho module thủ công mới.
+
+---
+
 # Đăng nhập admin bằng mật khẩu
 
 Yêu cầu mới 28/10/2026: bỏ nút Google; dùng tên đăng nhập `admin`. Không tạo owner mới hoặc xóa dữ liệu/tài khoản cũ.

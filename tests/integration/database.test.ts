@@ -25,6 +25,7 @@ beforeAll(async () => {
     "202610250011_visible_orders_v2.sql",
     "202610250012_order_birth.sql",
     "202610250013_birth_minutes.sql",
+    "202610280014_manual_delivery.sql",
   ])
     await db.exec(
       readFileSync("supabase/migrations/" + file, "utf8").replace(
