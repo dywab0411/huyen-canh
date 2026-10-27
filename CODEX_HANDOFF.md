@@ -1,3 +1,13 @@
+## Mở module quản trị thủ công — 2026-10-28 +07
+
+Nguyên nhân /admin không mở: MANUAL_DELIVERY_ENABLED=false trong wrangler.toml; production /api/delivery POST list trả403 thông báo preview. Browser đã tới /admin nhưng không tải được danh sách; không phải bằng chứng sai password. Thay duy nhất flag manual=true; PUBLIC_PREVIEW_ONLY=true, CHECKOUT_ENABLED=false giữ nguyên. Endpoint vẫn kiểm JWT/password AMR, owner backend, Origin, rate limit và private storage. Không mở paid API hoặc cấp thêm role.
+
+Regression tests/integration/manual-release.test.ts: trước đổi flag FAIL exit1; sau sửa PASS. Format/lint/typecheck/build/check:secrets exit0; unit52 PASS, integration80 PASS; playwright tests/e2e/manual-delivery.spec.ts 5 PASS exit0 (fixture local). Full E2E chưa chạy lại. Source wrangler.toml và test mới; log ngoàiGit .admin-open-20261028.
+
+Trạng thái PARTIAL: đang chuẩn bị push/rebuild để kiểm tra cloud /admin, tạo/lưu/sửa và tra cứu dữ liệu giả. Chưa đánh dấu cloud CRUD/video PASS trước thao tác thực tế. Cloud migration014/private bucket/RLS đã được kiểm tra vòng trước; không chạy lại migration. Mật khẩu do chủ tài khoản tự đặt, không đọc/ghi credential. Tiếp theo xác minh deployment và browser phiên password hiện tại, kiểm thử tạo bài giả rồi tra cứu; rollback manual=false nếu bảo vệ sai. Không đổi ACL, payment, RLS hoặc xóa đơn cũ.
+
+---
+
 ## Sửa lỗi đổi mật khẩu bị MFA cũ chặn — 2026-10-28 +07
 
 Nguyên nhân đã xác minh trong Supabase Auth logs: PUT /user trả 401, AAL2 required khi tài khoản còn MFA. Frontend trước đây ném Error rỗng nên che nguyên nhân. Không phải bằng chứng mật khẩu nhập sai. HC-AUTH-PASSWORD: PARTIAL; đổi mật khẩu và đăng nhập thật chưa được xác minh.
