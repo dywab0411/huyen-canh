@@ -1,3 +1,148 @@
+## Sửa QR MFA — 2026-10-27T23:53:53+07:00
+
+Nguyên nhân đã xác định trong SDK cài đặt: Supabase auth-js thêm tiền tố data:image/svg+xml;utf-8 vào qr_code, trong khi Mfa.tsx bọc thêm tiền tố data URI và encode toàn bộ lần nữa. Trình duyệt nhận nội dung không phải SVG nên ảnh hỏng. Bấm thiết lập lại gặp friendly name trùng vì lần enroll đầu đã tạo factor chưa xác minh.
+
+Đã sửa src/features/account/Mfa.tsx và thêm src/lib/mfa-qr.ts: chuẩn hóa raw SVG/data URI, không bọc lồng; khóa nút khi đang tạo/đã có QR. Thêm nút Làm lại thiết lập chưa hoàn tất để chính người dùng bỏ factor TOTP unverified mang đúng tên ứng dụng; không xóa verified factor, không tự thực hiện trên tài khoản người dùng. Không giảm MFA/RLS hoặc thay checkout.
+
+Regression tests/unit/mfa-qr.test.ts: 3 test tái hiện trước sửa đều FAIL (exit 1), sau sửa toàn bộ unit 48/48 PASS, integration 63/63 PASS. Format/lint/typecheck/build/check:secrets đều exit 0. Chưa chạy E2E QR tương tác trong vòng này; chưa xác minh QR mới hoặc mã TOTP thật trên production. Không lưu QR, OTP hoặc secret thật trong test/report. Bằng chứng lệnh/log ngoài Git .mfa-qr-fix-20261027 trên C.
+
+Trạng thái local PASS; production QR/AAL2 NOT_TESTED chờ deployment và chủ tài khoản tự thao tác. Chưa mở nhận đơn thật. Owner/backend đã cấu hình theo báo cáo vòng trước. Không tự thay chính sách hủy/hoàn hoặc retention trong bản sửa QR.
+
+
+---
+
+## Chuẩn bị backend nhận đơn — 2026-10-27T11:40:35+07:00
+
+Trạng thái IN_PROGRESS/BLOCKED nhận đơn thật. Đã lưu sáu Secret trên Cloudflare Production: SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, PUBLIC_ORIGIN, LOOKUP_PEPPER_V1, TURNSTILE_SITE_KEY, TURNSTILE_SECRET_KEY. Không ghi giá trị khóa vào source hoặc báo cáo. Turnstile Managed cho huyencanh.pages.dev, pre-clearance tắt. Chưa nghiệm thu deployment mới nhận các runtime Secret này.
+
+Sau xác nhận trực tiếp của chủ dự án, đã cấp owner cho UUID tài khoản đã đối chiếu với Auth và ghi audit. Không cấp quyền từ email do trình duyệt gửi. MFA AAL2 vẫn bắt buộc; chờ chủ tài khoản tự thiết lập TOTP và xác minh phiên trên trang tài khoản. Không lưu OTP hoặc QR TOTP.
+
+PASS kiểm tra cloud RLS hồ sơ bằng SET LOCAL ROLE authenticated với claims thử và ROLLBACK: người B không đọc/sửa hồ sơ owner; owner đọc được hồ sơ chính mình. Đây là kiểm tra SQL, KHÔNG thay cho hai phiên Google thực hoặc kiểm thử toàn bộ API/admin/Storage.
+
+Chủ dự án chốt hủy trong 15 phút từ khi đăng ký; còn thiếu tỷ lệ hoàn, thời gian xử lý và trường hợp hủy sau 15 phút khi chưa làm. Chưa tự đặt chính sách không hoàn tiền. Chủ dự án chọn không có thời hạn lưu; chưa sửa migration hoặc áp dụng chính sách mới lên cloud. Các RPC dry-run hiện vẫn liệt kê ứng viên 30/180 ngày, chưa có xác minh quy trình xóa/backup. TTL bảo mật, phiên tra cứu và thời hạn thanh toán phải giữ nguyên.
+
+PUBLIC_PREVIEW_ONLY=true, CHECKOUT_ENABLED=false; chưa mở nhận tiền. Tạo đơn thật → xác nhận thanh toán → trả bài → tra cứu trên cloud: NOT_TESTED. Backup/restore, MFA API, signed URL và quyền truy cập chéo đơn cần nghiệm thu trước release_verified. Không có test/build mới trong vòng chỉ cấu hình này; kết quả 45 unit/63 integration/2 E2E của vòng G20 trước giữ phạm vi cũ, không tính là kiểm thử mới.
+
+File cập nhật vòng này: bốn CODEX_*.md. Bằng chứng tên cấu hình và kết quả SQL nằm ngoài Git tại C:/Users/User/Downloads/boi/.checkout-ready-20261027/preparation.json, không có giá trị secrets. Không sửa mã ứng dụng, không push hoặc triển khai source mới trong vòng cấu hình này.
+
+Tiếp theo: người dùng hoàn tất MFA và chốt chi tiết hoàn tiền; triển khai lựa chọn retention bằng migration bổ sung và test, giữ TTL kỹ thuật; kiểm thử backend/deployment với cấu hình mới, kiểm thử đầy đủ quyền/đơn/lookup và diễn tập khôi phục. Không chạy lại migration 001–013; không đổi ngân hàng, ACL, khóa hay mở release để bỏ qua gate.
+
+
+---
+
+# Kiểm thử gói G20 — 2026-10-27T11:19:37+07:00
+
+## A. Tổng quan
+PASS local/DEMO; BLOCKED production end-to-end bởi PUBLIC_PREVIEW_ONLY=true vàcheckout_enabled=false. Project IN_PROGRESS; không nghiệmthu production-ready hoặc tăng tỷlệhoànthành toànbộ. Source app0.1.0/OAuthcfab3b8, checkout test C:/Users/User/Downloads/boi/.github-sync-20261026 khớp runtime D:/boi. Chỉ thêm regressiontest, không sửa runtime/migration hoặcproduction config. Khôngtạođơn/paid/admin/kếtquảkháchthật trêncloud.
+
+## B. Công việc và kết quả thực tế
+- PASS browser local http://127.0.0.1:5187/dat-don?demo=1&goi=G20: gói20.000đ, ngày29/02/2000/giờ00:00fixture, tạo bản ghiDEMO, mãđơn+ mãtra cứuriêng, báo chuyển khoản giả lập, tra cứu đúng mã, trả kết quảvănbảnpositive/difficulties/advice. Reload và nhập lại mã vẫn mở bảnmẫu; mãsai báo khôngtồntại/hếthạn. Không dùngthôngtincánhânthật. Không coi bài DEMO ngắn là bài luận giải cá nhân≥501từ đã giao thật.
+- PASS regression mới tests/integration/g20-lifecycle.test.ts: PGlite disposable áp dụng13migration. TạoG20 lấyversionquote server/20k snapshot; retryidempotency khôngđơntrùng; claimrepeat mộtclaimed event vàchưa paid; unpaidpublish bịchặn; saisốtiền bịchặn; confirmđúng20k retry mộtverified event; paidchưacókếtquả; draftẩn; staleversionpublish bịchặn; publishđúngversion→delivered→secretlookup trảđúngbody. Mãđơncôngkhai/mãsai khôngmởbài; DOB/phone khôngDTO. Admin/release/payment ởđây chỉfixture trongRAM, không sửacloudguards.
+- PASS kiểmproduction https://huyencanh.pages.dev/dat-don?goi=G20 hiểngói20kvàthôngbáotạmngừng, /tra-cuu dùngmộtmãbảomật. GETconfig:false/trueguard; POSTpayloadrỗng/api/orders và/api/orders/lookup đều403,no-store. Khôngtạođơncloudhoặcnhậpbiênlaithật. /api/packages trảG20=20000từdefaults, không giả đãxácminhgiábackendcloudquaendpointnày.
+- BLOCKED realcloud purchase→adminpayment→draft/publish→lookup bởiguardđúngcấuhình; khôngtắtguardđểtestđạt.
+
+## C. Ma trận chức năng
+| Bước | Local/fixture | Production |
+|---|---|---|
+|G20 giá20.000đ/form|PASS browser+SQL|PASS hiểnthị, tạođơnBLOCKED|
+|Tạođơn/quote/idempotency|PASS SQLlocal; DEMO riêng|BLOCKED403|
+|Nhậnmã|PASS DEMO, secretlookupSQL|NOT_TESTED đơnthật|
+|Báochuyểnkhoản|PASS khôngtựpaid/retry|NOT_TESTED|
+|Adminxácnhậntiền|PASS syntheticSQL|NOT_TESTED; khôngcấpadmin|
+|Nháp/paid/xuấtbản/version|PASS SQLlocal|NOT_TESTED|
+|Kếtquảtheomãbảomật|PASS đúngmã/saimã/ẩnPII/DEMOreload|BLOCKED403|
+|PhânquyềncloudMFA/A-B/Storage/consent|Testintegrationcũ vẫnđạtlocal|Chưanghiệmthuđầyđủ|
+
+Giao diện/animation/responsive/12tool/OAuth/profile/history/video/email/Zalo/library/consent giữtrạngtháibáocáotrước, khôngghiPASSmới nếu khôngtest vòngnày. Profilecloudđãsave/readbacksau13migration theobằngchứngphiên26/10, khônghồiquyđầylại.
+
+## D. Kiểm thử
+Checkout C ởtrên, node/npmD, logs C:/Users/User/Downloads/boi/.g20-test-20261027. 45unit/63integration/2E2EG20 đạt; khôngchạyfull46E2Evòngnày. E2Ekiểm0POSTtrongDEMO, khôngdữliệuPIItrongsessionStorage. BrowserCUA thực tại5187cònđượcthao táctay. Dev5173banđầukhôngchạy nênmởserverkiểmthử5187, khôngdừngserverkhác.
+
+| Lệnh | Exit |
+|---|---:|
+| `npm run format:check` | 0 |
+| `npm run lint` | 0 |
+| `npm run typecheck` | 0 |
+| `npm test` | 0 |
+| `npm run test:integration` | 0 |
+| `npm run build` | 0 |
+| `npm run test:e2e -- --grep G20|demo transfer` | 0 |
+| `npm run check:secrets` | 0 |
+
+Lúc viết test mới có hai lỗi fixture đã sửa: awaittrongdefaultparameter làm suitekhôngload(exit1), vàquoteversionhardcode1 gâypackageversionconflict(1testfail/exit1). Sửa testđể lấyversionthựctừservice_packages; không bỏoptimistic concurrency hoặc sửaappđểtestđạt. Sauđótestmới1/1đạt, fullintegration63/63đạt. Cảnhbáochunk>300kB vàNO_COLOR/FORCE_COLORvẫncòn, khôngphảilỗichứcnăng. KhôngbịalocalPASSthànhcloudPASS.
+
+## E. Lỗi/blocker
+HC-G20-001 P1 BLOCKED realcloud: configPUBLIC_PREVIEW_ONLY vàcheckoutfalse, tạo/lookup403. TiếptụccầnstagingQAđượcphêduyệt, backendenv,Turnstile,ownerMFA/A-B,backuprestore rồiownerduyệtrelease; khôngđổicodeguard. Khôngpháthiệnlỗiruntimemớitrongphạmvilocalđãtest. HC-G20-002 P2 NOT_TESTED actual501wordcustomresult/deliverycloud; DEMOchỉsample.
+
+## F. Còn thiếu
+RealcloudG20/Turnstile/HttpOnly-CSRF-session/adminAAL2/paymentconcurrency/privatefile/result/expiry/revocation; khôngcoiSQLfixturehoặcDEMOlàđơnthật. ToànbộgatechưanghiệmthuRPT/ORD/SB/LIBcòngiữ. Khôngtạo501từkháchgiảđểgiảđãgiaobài.
+
+## G. Chủ dự án cần cung cấp
+Khôngcầnsecretsđểtestlocal. QAcloudriêngcầntàikhoảntest/ownermembershipMFA+backendenvđặttạidịchvụ,cấuhìnhTurnstile vàxácnhậnphạmvi. Khônggửikey/mậtkhẩuquadchat. Khôngyêucầungânhànglại.
+
+## H. Tiếp theo
+Giữcheckoutkhóa. Tạo/stagingQAriêngtheoguidevàtestA/B/MFA/lookup thật, ngănđơntrùng,publishsaupaid,backuprestore. Chỉbậtproductionkhiownerduyệtriêng. Reporttestnày khôngphảilệnhmởdịchvụ.
+
+## I. Cách kiểm tra local
+Devtestđangở http://127.0.0.1:5187/dat-don?demo=1&goi=G20; đi theoCTA đếntra-cứuDEMOtrongcùngtab, khôngchuyểntiền. DEMOexpire1h, namespacekhôngdùngtrênproduction. Tựchạy: cdD:/boi; npm run dev -- --port 5187 --strictPort (kiểmPIDtrướcstart). npm run test:integration; npm run test:e2e -- --grep "G20|demo transfer". /admin khôngcótàikhoảndemo. Mãđơncôngkhai khôngthaymãtra cứubảomật.
+
+
+---
+
+## Production OAuth và lưu hồ sơ — 2026-10-26T22:24:07+07:00
+
+### A. Tổng quan
+Project IN_PROGRESS. PASS thực tế cho deployment mới, chuyển Google và phiên user đã đăng nhập, lưu hồ sơ và đọc lại sau reload tại https://huyencanh.pages.dev/tai-khoan. Không gọi toàn bộ bảo mật/cloud/production-ready VERIFIED. Commit source cfab3b8412a6a60ad8fc7601b7096add77b60c93; không có source change mới trong vòng này. Không tăng tỷ lệ hoàn thành toàn bộ từ rubric cũ khi chưa đủ gate.
+
+### B. Công việc đã thực hiện
+- Rebuild production bằng Cloudflare Dashboard theo yêu cầu: deployment ba575c3a-fb13-4867-a9a4-bc33b3b0fbbd, success lúc khoảng22:10+07 ngày26/10, commitcfab3b8. Nguyên nhân OAuth trước đó: buildcommand đã lưu nhưng chưa có deployment dùng lệnh mới. Bundle index-CpErmwnA.js có ProjectURL và publishablekey; không ghi key vào báo cáo/source.
+- Nhấn Google trên website thật đến Google account chooser đúng project/callback. Chủ tài khoản hoàn tất đăng nhập trong IAB. Đã kiểm UI authenticated, thao tác save và reload vẫn có profile/session. Không ghi userUUID/email/displayname/token vào báo cáo. Chưa testlogout/cancel/expiryrefresh hoặc tài khoảnB.
+- Lỗi hồ sơ chính xác: REST public.profiles và reading_history trả404/PGRST205, Dashboard public trống. Sau chủ dự án xác nhận rõ, áp dụng transaction migration001–013 từ D:/boi/release/supabase-new-staging.sql qua SQL Editor projectwutxklvvimwopckfjmga. SQLSHA256 6cba672e4be670fb940848a90453bf6b2adfe8d618ae6b8513f5e174189726d2. Kết quả Success.No rows returned; 25bảng public xuất hiện. Không chạy lại migration, không reset/xóaAuthuser, không cấpadmin.
+- Metadata thực tế: schema13=true; mọi bảng appRLS=true; bốn bucketprivate=true; release_locked=true; no_admin_granted=true; anonprofiledenied=true. Sau đó nút Lưu hồ sơ báo thành công; reload giữ tên và nhóm tuổi đã nhập. Không dùng service_role từ frontend.
+
+### C. Kiểm tra chức năng
+| Nhóm | Trạng thái thực tế |
+|---|---|
+|Giao diện/hoạt ảnh/responsive/12tool|Giữ regression local trước; không full test lại vòng này|
+|Google OAuth/session|PASS luồng một user trênproduction: tớiGoogle, userhoàn tất, authenticated UI vàsessioncònsau reload; logout/cancel/expiry NOT_TESTED|
+|Hồ sơ|PASS production save vàreadback sau reload|
+|Lịch sử|Schema/RLS đã tạo; chưa lưu/mở bài lịch sử thật trong phiên: NOT_TESTED cloud|
+|Bốn gói/đơn/chuyển khoản/xác nhận thanh toán|Giữ khóa nhận thật; cloud nghiệp vụ NOT_TESTED|
+|Admin/quyền|Không cấpadmin; MFA/editor/owner thực tế NOT_TESTED|
+|Tra cứu/kết quả/tệp riêng|Migration có, QA nghiệp vụ cloud NOT_TESTED|
+|Zalo/email/video/consent|Không thao tác mới; cloud NOT_TESTED|
+|Database/RLS/Storage|PASS migration, metadata vàanon denied; A/B JWT vàsignedURL NOT_TESTED|
+|Triển khai Free|PASS deployment này vàURLproduction; quota/backup/restore chưa nghiệmthu|
+
+### D. Kiểm thử/bằng chứng
+Vòng này không đổi runtime code và không chạy lại unit/E2E local. Lần trước sourcecfab3b8 đãformat/lint/typecheck/build/unit45/integration62/E2E46; E2E đầu bịngắt devserver5187, retry đạt46. Không ghi kết quả cũ thành lượt mới.
+
+Cloudflare Git build: npm clean-install, tsc --noEmit && vite build, Functions compile, upload và deployment success. Không có shell exitcode riêng từDashboard; trạng thái thành công không giả thành terminalexit0. Cảnh báo chunk300kB còn nguyên. Buildcommand có publicURL/publickey; không đưa rawlog chứa cấu hình/tokens vàoGit.
+
+SQL transaction001–013: Success.No rows returned. Truy vấn metadataSELECT đọc kết quảtrue như mụcB. RESTanon limit0 kiểm4bảng profiles/reading_history/orders/order_credentials đều401/42501, không trảdữliệu. GET/api/config checkout_enabled=false vàpublic_preview=true. Browser: Lưu hồ sơ→thông báo thành công→reload→profile đúng vàsession còn. Bằng chứng private ngoàiGit C:/Users/User/Downloads/boi/.oauth-production-20261026/profile-verification.json vàprofile-reloaded.png; screenshot có profileuser nên không commit.
+
+### E. Lỗi/blocker
+- HC-AUTH001 PASS phạmvi configbuild/deploy mới đã nhậnVITE; không còn thiếuclient.
+- HC-AUTH003 PARTIAL: phiên thực vàprofile sauGoogle đã kiểm; chưalogout/cancel/expiry vàA/B.
+- HC-PROFILE001 PASS cloud: schema thiếu gâyPGRST205, đãapply13vàsave/readback.
+- HC-SB001 PASS phầnapply001–013/schema13, không đồng nghĩa tấtcảRLS/RPC đãQA.
+- HC-AUTH002/HC-SB002 vàcác ORD/RPT/LIB: PARTIAL/NOT_TESTED cácgateA/B/editor/owner/MFA/Storage/lookup/payment/consent. CầnQAriêng, khôngđónghết.
+- HC-SB004 P2: backup/restore/retention scheduler/quota chưa diễn tập. SQL Editor khôngghi SupabaseCLI migrationledger, cầnreconcile trướcdbpush; khôngpush/reapplymù.
+
+### F. Còn thiếu
+QA clouduserA/B, profile/historytamper, loginlogoutcancel, JWTexpiry/MFA, admin, orders/payment/concurrency, privateStorageURLs, consentrevocation vàbackuprestore. Không bậtcheckout/release vì lưu hồ sơ đãđược. Không có secret mới trongGit, khôngđổiACL/ngânhàng/pepper. Hai public configVITE chỉởCloudflarebuildcommand.
+
+### G. Chủ dự án cần cung cấp
+Không cần gửi key/password cho lỗi hồ sơ đã sửa. Muốn nghiệmthu hết cần tài khoản testA/B/editor/owner do chủ dự án kiểm soát vàxácnhận phạmviQA; không cấpadmin tựđộng.
+
+### H. Tiếp theo
+Giữ deploymentba575c3a vàschema13; khôngrunlạifileghép. Kiểmprofile/historyA/B,logout/refresh, rồi từngcloudgate theoSUPABASE_SETUP_GUIDE. Chưa mở đặtđơn/thu tiền. Cácbáocáolịchsử nói cloudchưaapply ởdưới làtrạngtháicũ trướcxácnhậnphiênnày.
+
+### I. Kiểm tra
+Production https://huyencanh.pages.dev/tai-khoan: đãlogin→profile→Lưu→reload. Local127.0.0.1:5173 làmôitrườngriêng chưa tựnhận cloudbuildvars. /admin khôngcócredentialsdefault vàchưacấpadmin. Windows cdD:/boi; npm run dev -- --port 5173 --strictPort, kiểmPIDtrướcstart. Khôngchỉdựa vàolocaltestđểbáocloudPASS.
+
+---
+
 ## Google OAuth production — 2026-10-26T02:30:32+07:00
 
 ### A. Tổng quan

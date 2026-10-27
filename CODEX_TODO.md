@@ -1,3 +1,47 @@
+## Sửa QR MFA — 2026-10-27T23:53:53+07:00
+
+Nguyên nhân đã xác định trong SDK cài đặt: Supabase auth-js thêm tiền tố data:image/svg+xml;utf-8 vào qr_code, trong khi Mfa.tsx bọc thêm tiền tố data URI và encode toàn bộ lần nữa. Trình duyệt nhận nội dung không phải SVG nên ảnh hỏng. Bấm thiết lập lại gặp friendly name trùng vì lần enroll đầu đã tạo factor chưa xác minh.
+
+Đã sửa src/features/account/Mfa.tsx và thêm src/lib/mfa-qr.ts: chuẩn hóa raw SVG/data URI, không bọc lồng; khóa nút khi đang tạo/đã có QR. Thêm nút Làm lại thiết lập chưa hoàn tất để chính người dùng bỏ factor TOTP unverified mang đúng tên ứng dụng; không xóa verified factor, không tự thực hiện trên tài khoản người dùng. Không giảm MFA/RLS hoặc thay checkout.
+
+Regression tests/unit/mfa-qr.test.ts: 3 test tái hiện trước sửa đều FAIL (exit 1), sau sửa toàn bộ unit 48/48 PASS, integration 63/63 PASS. Format/lint/typecheck/build/check:secrets đều exit 0. Chưa chạy E2E QR tương tác trong vòng này; chưa xác minh QR mới hoặc mã TOTP thật trên production. Không lưu QR, OTP hoặc secret thật trong test/report. Bằng chứng lệnh/log ngoài Git .mfa-qr-fix-20261027 trên C.
+
+Trạng thái local PASS; production QR/AAL2 NOT_TESTED chờ deployment và chủ tài khoản tự thao tác. Chưa mở nhận đơn thật. Owner/backend đã cấu hình theo báo cáo vòng trước. Không tự thay chính sách hủy/hoàn hoặc retention trong bản sửa QR.
+
+
+---
+
+## Chuẩn bị backend nhận đơn — 2026-10-27T11:40:35+07:00
+
+Trạng thái IN_PROGRESS/BLOCKED nhận đơn thật. Đã lưu sáu Secret trên Cloudflare Production: SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, PUBLIC_ORIGIN, LOOKUP_PEPPER_V1, TURNSTILE_SITE_KEY, TURNSTILE_SECRET_KEY. Không ghi giá trị khóa vào source hoặc báo cáo. Turnstile Managed cho huyencanh.pages.dev, pre-clearance tắt. Chưa nghiệm thu deployment mới nhận các runtime Secret này.
+
+Sau xác nhận trực tiếp của chủ dự án, đã cấp owner cho UUID tài khoản đã đối chiếu với Auth và ghi audit. Không cấp quyền từ email do trình duyệt gửi. MFA AAL2 vẫn bắt buộc; chờ chủ tài khoản tự thiết lập TOTP và xác minh phiên trên trang tài khoản. Không lưu OTP hoặc QR TOTP.
+
+PASS kiểm tra cloud RLS hồ sơ bằng SET LOCAL ROLE authenticated với claims thử và ROLLBACK: người B không đọc/sửa hồ sơ owner; owner đọc được hồ sơ chính mình. Đây là kiểm tra SQL, KHÔNG thay cho hai phiên Google thực hoặc kiểm thử toàn bộ API/admin/Storage.
+
+Chủ dự án chốt hủy trong 15 phút từ khi đăng ký; còn thiếu tỷ lệ hoàn, thời gian xử lý và trường hợp hủy sau 15 phút khi chưa làm. Chưa tự đặt chính sách không hoàn tiền. Chủ dự án chọn không có thời hạn lưu; chưa sửa migration hoặc áp dụng chính sách mới lên cloud. Các RPC dry-run hiện vẫn liệt kê ứng viên 30/180 ngày, chưa có xác minh quy trình xóa/backup. TTL bảo mật, phiên tra cứu và thời hạn thanh toán phải giữ nguyên.
+
+PUBLIC_PREVIEW_ONLY=true, CHECKOUT_ENABLED=false; chưa mở nhận tiền. Tạo đơn thật → xác nhận thanh toán → trả bài → tra cứu trên cloud: NOT_TESTED. Backup/restore, MFA API, signed URL và quyền truy cập chéo đơn cần nghiệm thu trước release_verified. Không có test/build mới trong vòng chỉ cấu hình này; kết quả 45 unit/63 integration/2 E2E của vòng G20 trước giữ phạm vi cũ, không tính là kiểm thử mới.
+
+File cập nhật vòng này: bốn CODEX_*.md. Bằng chứng tên cấu hình và kết quả SQL nằm ngoài Git tại C:/Users/User/Downloads/boi/.checkout-ready-20261027/preparation.json, không có giá trị secrets. Không sửa mã ứng dụng, không push hoặc triển khai source mới trong vòng cấu hình này.
+
+Tiếp theo: người dùng hoàn tất MFA và chốt chi tiết hoàn tiền; triển khai lựa chọn retention bằng migration bổ sung và test, giữ TTL kỹ thuật; kiểm thử backend/deployment với cấu hình mới, kiểm thử đầy đủ quyền/đơn/lookup và diễn tập khôi phục. Không chạy lại migration 001–013; không đổi ngân hàng, ACL, khóa hay mở release để bỏ qua gate.
+
+
+---
+
+## G20 test — 2026-10-27T11:19:37+07:00
+
+LocalPASS:45unit/63integration/2E2E,format/lint/type/build/scan. Testmới g20-lifecycle.test.ts (PGlitedisposable) điđủquote/idempotency/claim/notpaid/confirmretry/drafthidden/staleversion/publish/secretlookup20k; khôngcloudmutation. BrowserDEMOđúng/saimãvàreloadPASS. Productiongói20khiểnthị,checkoutfalse/publicpreviewtrue,orders+lookupPOST403:no-store;realcloudendtoendBLOCKED, khôngmởkhóa. XemG20_TEST_REPORT.md; testdataDEMOkhôngphảiđơnthật. Cácblockertrướcgiữnguyên, testscreenshot/logC .g20-test-20261027ngoàiGit. KhôngđổiACL/secret/ngânhàng/Admin/Supabase; khôngchạylạimigrationcloud.
+
+---
+
+## Production profile — 2026-10-26T22:24:07+07:00
+
+PASS: deployba575c3a, buildenv vàsave/readbackprofile+sessionreload thực. Chủdựánđãduyệtapply001–013: schema13/RLS/private4buckets/releasefalse/noadmin verified; anon4tables401/42501. HC-PROFILE001đóng, HC-AUTH003vẫnPARTIALlogout/expiry/A-B; cloudsecurity/payment/lookup/storageQA vẫnNOT_TESTED. Khôngrunlạimigrationghép, cầnCLIledgerreconcile. Khôngmởcheckout. BằngchứngngoàiGit .oauth-production-20261026trênC.
+
+---
+
 ## OAuth — 2026-10-26T02:30:32+07:00
 
 HC-AUTH001 PARTIAL: production build không có Supabase env. HC-AUTH002 BLOCKED: Auth/RLS production QA trước enable. HC-AUTH003 NOT_TESTED: login/callback/session thật. Đọc OAUTH_DIAGNOSIS.md. Local45unit/62integration/build/typecheck/lint/formatPASS; E2E không chạy lại. Source chưa push/deploy. Giữ cloud blockers và checkoutfalse.
