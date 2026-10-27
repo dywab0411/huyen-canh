@@ -56,3 +56,8 @@ Xóa trên giao diện là xóa mềm: ngừng tra cứu/list và giữ khả n�
 Chạy npm run format:check, lint, typecheck, test, test:integration, build, test:e2e, check:secrets. Test mới dùng code/video giả và SQL local, không chứng minh cloud upload/Google/password thật. Kiểm tra anon/B không tạo/sửa/xóa hoặc liệt kê; owner password đăng nhập mới có thể CRUD; code sai/nháp/đã xóa không mở; video link hết hạn và không public; stale version 409; thử đổi video và text rồi lookup đúng đơn.
 
 Rollback an toàn: MANUAL_DELIVERY_ENABLED=false và rebuild; giữ hai bảng, bucket và dữ liệu. Không DROP hoặc xóa Auth user khi rollback. Dữ liệu cũ/paid và guards không thay.
+
+
+## Lỗi đổi mật khẩu do MFA cũ
+
+Nếu Supabase yêu cầu AAL2, liên kết recovery đơn thuần không đủ. Xác minh bằng MFA hiện có hoặc chủ tài khoản xác nhận xử lý yếu tố MFA cũ cho đúng user trong Dashboard; không tắt RLS/MFA policy toàn cục. Sau khi giải quyết MFA, chính chủ tự nhập và lưu mật khẩu mới. Không gửi mật khẩu qua chat.

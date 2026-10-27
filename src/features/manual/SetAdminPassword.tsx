@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { auth } from "../../lib/auth";
+import { passwordChangeMessage } from "../../lib/password-error";
 export function RecoveryRedirect() {
   const navigate = useNavigate();
   useEffect(() => {
@@ -73,14 +74,14 @@ export function SetAdminPassword() {
             setBusy(true);
             try {
               const { error } = await auth!.auth.updateUser({ password });
-              if (error) throw Error();
+              if (error) throw error;
               setMessage(
                 "Đã đổi mật khẩu. Hãy đăng nhập lại bằng tài khoản admin.",
               );
               await auth!.auth.signOut();
               navigate("/tai-khoan", { replace: true });
-            } catch {
-              setMessage("Chưa đổi được mật khẩu. Vui lòng thử lại.");
+            } catch (error) {
+              setMessage(passwordChangeMessage(error));
             } finally {
               setPassword("");
               setRepeat("");

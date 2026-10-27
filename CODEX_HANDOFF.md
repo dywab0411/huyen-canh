@@ -1,3 +1,15 @@
+## Sửa lỗi đổi mật khẩu bị MFA cũ chặn — 2026-10-28 +07
+
+Nguyên nhân đã xác minh trong Supabase Auth logs: PUT /user trả 401, AAL2 required khi tài khoản còn MFA. Frontend trước đây ném Error rỗng nên che nguyên nhân. Không phải bằng chứng mật khẩu nhập sai. HC-AUTH-PASSWORD: PARTIAL; đổi mật khẩu và đăng nhập thật chưa được xác minh.
+
+Đã sửa src/features/manual/SetAdminPassword.tsx để giữ mã lỗi; thêm src/lib/password-error.ts ánh xạ whitelist thông báo ngắn, không in raw provider message/token. tests/unit/password-error.test.ts có 4 regression: MFA, phiên hết hạn/reauth, mật khẩu yếu/trùng, không lộ thông báo tùy ý. Trước sửa 3 FAIL/1 PASS exit1; sau sửa toàn bộ 52 unit PASS, 78 integration PASS exit0. Format, lint, typecheck, build, check:secrets exit0. Lint lần đầu exit1 do helper import chưa dùng, đã sửa và chạy lại PASS. Chưa chạy lại E2E vòng này; test local không chứng minh cloud đổi mật khẩu thành công.
+
+Chủ tài khoản xác nhận gỡ MFA cũ CHỈ tài khoản quản trị trong câu trả lời trực tiếp; đã thực hiện Remove MFA factors trong Supabase Dashboard. Không thay MFA policy toàn cục, RLS, quyền owner, dữ liệu đơn hoặc guards. Cần kiểm tra số factor còn lại và chủ tài khoản tự nhập/submit mật khẩu mới; không ghi credential vào source/Git/reports. Không mở nhận tiền hoặc manual delivery.
+
+Tiếp theo: xác minh gỡ MFA, chủ tài khoản lưu password mới trên /admin/dat-mat-khau, thử login admin và refresh session; sau đó QA cloud CRUD/video/lookup trước mở module. Không tự thay mật khẩu, DROP dữ liệu, đổi ACL hoặc bật thanh toán. Source đã chuẩn bị commit/push; trạng thái deployment cần kiểm chứng sau push. Log local ngoàiGit tại .password-aal-20261028. Chạy Windows npm run dev; build/test theo package.json. Không tái chạy migration001–014 trên cloud.
+
+---
+
 ## Sửa nhập nhầm tên tài khoản — 2026-10-28T01:58:48+07:00
 
 Browser production cho thấy usernameIsAdmin=false và ngay cả trim/lowercase vẫn không phải admin. Không đọc/ghi giá trị tên người dùng đã nhập hoặc mật khẩu. Đã điền lại alias admin trên form, không submit credential, không đổi password. Chưa xác minh đăng nhập thành công. Trang /admin/dat-mat-khau vẫn có phiên xác minh và form để chính chủ tài khoản tự nhập/lưu mật khẩu; agent không thực hiện bước thay credential.
