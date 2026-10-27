@@ -1,3 +1,11 @@
+## Kết quả kiểm tra production quản trị — 2026-10-28 02:22 +07
+
+PASS thực tế: Cloudflare deployment 1c58f911-b616-4a33-b02a-335d06f2002c status success, commit f2c076f8a35885e3a30ca8b72974f0622cbf14d4. Browser production /admin với phiên password hiện tại đã tải danh sách, tạo mã, lưu bài giả, sửa lần2; /tra-cuu trả đúng nội dung mới. Đã xóa mềm duy nhất bản ghi kiểm thử vừa tạo, xác minh tra cứu mã đó bị từ chối; không tác động đơn cũ. Không lưu mã truy cập hoặc credential trong báo cáo. HTTP anon POST list401, paid /api/orders POST403. Thanh toán vẫn khóa, chỉ manual=true; RLS/private Storage/auth owner/password guard giữ nguyên.
+
+NOT_TESTED lượt này: cloud upload/phát MP4, login mới từ trạng thái logout, session dài hạn, full E2E toàn bộ. Tải lại /admin dùng phiên hiện tại là bước kiểm tra duy trì phiên ngắn. Không gọi toàn bộ hệ thống VERIFIED. Module chữ/code thực tế PASS, video vẫn PARTIAL theo bằng chứng cloud chưa có. Unit52/integration80/targetedE2E5 PASS; format/lint/typecheck/build/scan exit0. Source/config đã push f2c076f; bản báo cáo hậu kiểm commit riêng. Screenshot admin lưu ngoàiGit .admin-open-20261028/admin-production.png. Chủ website có thể mở /admin và bấm tạo mã; nội dung soạn thủ công, không hứa tự sinh bài/video. Không bật paid checkout, public bucket, hoặc tắt role check.
+
+---
+
 ## Mở module quản trị thủ công — 2026-10-28 +07
 
 Nguyên nhân /admin không mở: MANUAL_DELIVERY_ENABLED=false trong wrangler.toml; production /api/delivery POST list trả403 thông báo preview. Browser đã tới /admin nhưng không tải được danh sách; không phải bằng chứng sai password. Thay duy nhất flag manual=true; PUBLIC_PREVIEW_ONLY=true, CHECKOUT_ENABLED=false giữ nguyên. Endpoint vẫn kiểm JWT/password AMR, owner backend, Origin, rate limit và private storage. Không mở paid API hoặc cấp thêm role.
