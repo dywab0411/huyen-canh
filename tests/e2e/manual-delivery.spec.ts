@@ -83,13 +83,19 @@ test("admin creates code, saves and edits text, lists and deletes a delivery wit
     "video/mp4,.mp4",
   );
   await page.getByRole("button", { name: "Lưu đơn hàng", exact: true }).click();
-  await expect(page.getByRole("status")).toContainText("Đã lưu đơn hàng");
+  await expect(
+    page.getByRole("status", { name: "Trạng thái đơn hàng" }),
+  ).toContainText("Đã lưu đơn hàng");
   await page
     .getByLabel("Nội dung bài xem bói")
     .fill("Bản chỉnh sửa thử nghiệm.");
   await page.getByRole("button", { name: "Lưu đơn hàng", exact: true }).click();
-  await expect(page.getByRole("status")).toContainText("Đã lưu đơn hàng");
-  await page.getByRole("button", { name: "Tải lại danh sách" }).click();
+  await expect(
+    page.getByRole("status", { name: "Trạng thái đơn hàng" }),
+  ).toContainText("Đã lưu đơn hàng");
+  await page
+    .getByRole("button", { name: "Tải lại danh sách", exact: true })
+    .click();
   await expect(page.getByLabel("Nội dung bài xem bói")).toHaveValue(
     "Bản chỉnh sửa thử nghiệm.",
   );

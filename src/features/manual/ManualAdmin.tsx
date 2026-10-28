@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { ShowcaseAdmin } from "./ShowcaseAdmin";
+import { uploadPrivateVideo } from "../../lib/video-upload";
 import { api, auth } from "../../lib/auth";
 type Order = {
   id: string;
@@ -16,6 +18,7 @@ export function ManualAdmin() {
     [body, setBody] = useState(""),
     [video, setVideo] = useState<string | null>(null),
     [busy, setBusy] = useState(false),
+    [progress, setProgress] = useState<number | null>(null),
     [ready, setReady] = useState(false),
     [message, setMessage] = useState("");
   const working = useRef(false),
@@ -40,6 +43,7 @@ export function ManualAdmin() {
   }, []);
   function select(order: Order) {
     setSelected(order);
+    setProgress(null);
     setBody(order.body);
     setVideo(order.video_key);
     setMessage("");
@@ -67,6 +71,11 @@ export function ManualAdmin() {
   return (
     <section className="section narrow">
       <h1>Quản trị Huyền Cảnh</h1>
+      <nav aria-label="Khu vực quản trị">
+        <a href="#quan-ly-don">Quản lý đơn hàng</a> ·{" "}
+        <a href="#quan-ly-thu-vien">Quản lý thư viện video</a>
+      </nav>
+      <h2 id="quan-ly-don">Quản lý đơn hàng</h2>
       <button
         className="button secondary"
         disabled={busy}
@@ -82,6 +91,10 @@ export function ManualAdmin() {
         </p>
       ) : (
         <>
+          <p>
+            Tạo mã mới hoặc nhấn vào một đơn bên dưới để mở phần nhập chữ và tải
+            video riêng tư.
+          </p>
           <div className="panel">
             <button
               className="button"
@@ -159,22 +172,30 @@ export function ManualAdmin() {
                         size: file.size,
                         mime: "video/mp4",
                       });
-                      const { error } = await auth.storage
-                        .from("manual-results")
-                        .uploadToSignedUrl(
-                          String(r.key),
-                          String(r.token),
-                          file,
-                          { contentType: "video/mp4" },
-                        );
-                      if (error)
-                        throw Error("Chưa tải được video. Vui lòng thử lại.");
+                      setProgress(0);
+                      await uploadPrivateVideo(
+                        "manual-results",
+                        String(r.key),
+                        String(r.token),
+                        file,
+                        setProgress,
+                      );
                       setVideo(String(r.key));
                       setMessage("Đã tải video. Bấm Lưu đơn hàng để cập nhật.");
                     });
                   }}
                 />
               </label>
+              {progress !== null && (
+                <div>
+                  <p>Tải video: {progress}%</p>
+                  <progress
+                    aria-label="Tiến độ tải video đơn hàng"
+                    max={100}
+                    value={progress}
+                  />
+                </div>
+              )}
               {video && (
                 <p>
                   Đã có video cho đơn này.{" "}
@@ -264,7 +285,10 @@ export function ManualAdmin() {
           </div>
         </>
       )}
-      <p role="status">{message}</p>
+      <p role="status" aria-label="Trạng thái đơn hàng">
+        {message}
+      </p>
+      {ready && <ShowcaseAdmin />}
     </section>
   );
 }

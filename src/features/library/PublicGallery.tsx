@@ -9,9 +9,14 @@ export function PublicGallery() {
     [retry, setRetry] = useState(0);
   useEffect(() => {
     const controller = new AbortController();
-    void fetch("/api/library", { signal: controller.signal, cache: "no-store" })
-      .then((r) => (r.ok ? r.json() : { posts: [] }))
-      .then((r) => setPosts(r.posts ?? []))
+    void Promise.all(
+      ["/api/library", "/api/showcase"].map((url) =>
+        fetch(url, { signal: controller.signal, cache: "no-store" }).then(
+          (r) => (r.ok ? r.json() : { posts: [] }),
+        ),
+      ),
+    )
+      .then((results) => setPosts(results.flatMap((r) => r.posts ?? [])))
       .catch(() => {});
     void fetch("/api/public", { signal: controller.signal, cache: "no-store" })
       .then((r) => (r.ok ? r.json() : { reviews: [] }))
@@ -67,7 +72,7 @@ export function PublicGallery() {
                     controls
                     playsInline
                     preload="none"
-                    poster={p.cover_url}
+                    poster={p.cover_url || undefined}
                     src={p.video_url}
                     aria-label={p.title}
                     onError={(e) => {

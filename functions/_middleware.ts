@@ -11,7 +11,7 @@ export async function onRequest({ request, env, next }: Context) {
   // Authentication only: admin data and checkout remain guarded below.
   if (url.pathname === "/api/admin-login") return next();
   if (
-    url.pathname === "/api/delivery" &&
+    ["/api/delivery", "/api/showcase"].includes(url.pathname) &&
     env.MANUAL_DELIVERY_ENABLED === "true"
   )
     return next();

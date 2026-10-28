@@ -1,3 +1,52 @@
+## Nâng cấp Admin/video và kiểm tra tiền thật — 2026-10-28T15:09:09+07:00
+
+### A. Tổng quan
+IN_PROGRESS, chưa production-ready cho thanh toán; nâng cấp manual/library đang chuẩn bị deploy. Git nền9a663ab. Không đưa tỷ lệ hoàn tất toàn hệ thống do cloud video chưa kiểm chứng; gate local198/198 test đạt, cloud riêng ghi dưới. Website đang chạy, checkout giữ khóa.
+
+### B. Thực hiện
+PARTIAL HC-ADMIN-015: giữ giao diện/màu hiện tại, bổ sung điều hướng hai vùng, hướng dẫn chọn đơn để mở chữ/MP4, tiến độ byte thực qua XHR; thêm ShowcaseAdmin đăng một/nhiều MP4/WebM, tiêu đề/mô tả/ẩn/công khai/list/sửa/ẩn/xóa mềm. functions/api/showcase.ts kiểm Auth password/owner backend, Origin, schema,20MB, magic bytes, private bucket, version CAS; GET chỉ trả DTO của video công khai có quyền/đã kiểm định. Video khách manual-results tách biệt showcase-videos; không tự công khai nội dung khách. PublicGallery ghép API thư viện cũ và mới, không dùng HTML từ nội dung nhập. Module mới chỉ editorial không dữ liệu khách, quy trình consent cũ không bỏ.
+
+PASS phạm vi schema: migration015 sau xác nhận trực tiếp đã áp dụng transaction trên Supabase; RLS=true, anon/authenticated any DML=false, private bucket20MB, Storage object policies0. Paid orders0/manual orders3 trước và sau; không sửa dữ liệu cũ. Không rerun001–014. scripts/export-migrations cập nhật15 cho staging MỚI, không chạy trên cloud hiện có.
+
+### C. Chức năng
+|Hạng mục|Trạng thái|Bằng chứng/phạm vi|
+|---|---|---|
+|Giao diện/responsive|PASS local|Full55 E2E gồm responsive/axe; browser cloud mới đang chờ deploy|
+|12 nhóm miễn phí|PASS local|E2E runtime/offline, không khẳng định chính xác bói|
+|Google OAuth/hồ sơ|NOT_IMPLEMENTED UI mới|Đã loại theo yêu cầu, backend lịch sử giữ nguyên|
+|G10/G20/G60/G70|PASS local|GiáUI snapshot/regression; checkout chưa mở|
+|Tạo paid order/chuyển khoản/xác nhận tiền|BLOCKED|Preview/checkout khóa, chưa đối soát thật|
+|Admin manual chữ/mã|PASS cloud vòng trước|Nâng cấp mới cần hậu kiểm|
+|Admin video/thư viện mới|PARTIAL|Local pass, schema cloud pass; upload/phát thật chưa chạy|
+|Tra cứu private video|PARTIAL|Local test; cloud video chưa kiểm|
+|Zalo/email|PARTIAL|Thủ công, không tự gửi|
+|Tạo/xuất video|NOT_TESTED lượt này|Không tạo nội dung tự động; chỉ tải tệp có sẵn|
+|Đồng ý công khai|PASS local phạm vi|Không tự chuyển video khách sang thư viện; checkbox quyền editorial riêng, không thay consent khách|
+|Bảo mật/database|PARTIAL|RLS/schema cloud pass; các vai trò paid đầy đủ chưa kiểm cloud|
+|Free deployment|PARTIAL|Chuẩn bị push/rebuild; quota Storage20MB/tệp không vô hạn|
+
+### D. Kiểm thử
+npm run format:check/lint/typecheck/build/test/test:integration/check:secrets exit0 ở lần cuối. Unit56 PASS, integration87 PASS. npm run test:e2e lần đầu53 PASS/2 FAIL(selector trùng status/nhãn), targeted tiếp6 PASS/1 FAIL(selector nút danh sách trùng), sau sửa vùng status có tên và selector exact/fullrole: full55 PASS exit0. Không tắt guard hoặc xóa assertion. Lint ban đầu exit1(prefer-const testfixture) đã sửa. Script chỉnh UTF8 ban đầu lỗi decode, chạy lại UTF8 thành công. QR decoder cv2 không có, dùng zxing-cpp/Pillow cài ngoàiGit để giải mã; không sửa QR. Evidence .admin-library-20261028 ngoàiGit. HTTP200/testfixture không thay chứng minh quyền cloud.
+
+### E. Lỗi/chặn
+HC-PAY-001 P1: luồng paid AdminWorkspace không mount trong /admin tối giản; API cũ đòi AAL2, owner hiện password khôngMFA theo lựa chọn trước. Cần thiết kế/xác thực và QA riêng trước nhận tiền, không bỏ AAL2.
+HC-PAY-002 P1: site_config refund_policy trống, retention_approved=false, release_verified=false; không tự gán true. Backup/restore mới PGlite giả, cloud/staging diễn tập chưa có.
+HC-VIDEO-015 P2: signed library URL đã cấp còn hiệu lực tối đa300s sau ẩn/xóa; private đơn60s. Xóa mềm/upload dở vẫn chiếm quota; chưa autoGC, chưa scanner/chuyển codec. Cần theo dõi Free.
+
+### F. Thiếu
+Cloud upload/phát MP4/WebM, multi-file, edit/hide/delete và private lookup mới cần chạy sau deploy; real money tạo/claim/confirm/publish/lookup chưa chạy. QR tĩnh có bank BIN970403/account đúng, không tag54amount và descriptiongeneric; không tự điền số tiền/mã đơn. Tên người nhận thực phải đối chiếu app ngân hàng, chưa giao dịch.
+
+### G. Chủ dự án
+Đã xác nhận migration015. Chưa cần đổi cờ checkout. Chủ tài khoản sẽ tự thao tác ngân hàng khi các gate đạt; không gửi mật khẩu/OTP. Chính sách hủy/hoàn và lưu trữ cần chốt/cấu hình trước nhận tiền; không tự bịa chính sách.
+
+### H. Tiếp theo
+Deploy nâng cấp đã test→browser cloud upload riêng tư/thư viện và kiểm quyền→cập nhật hậu kiểm. Thanh toán tiếp tục BLOCKED, không xin bật trước khi đủ điều kiện. REAL_PAYMENT_READINESS.md ghi từng flag/gate và ADMIN_VIDEO_GUIDE.md ghi thao tác/quota/rollback. Không đổi ACL, secrets, paidguards, xóa đơn cũ hoặc tự xác nhận tiền.
+
+### I. Chạy/kiểm tra
+Windows: cd D:\boi; npm run dev. Local127.0.0.1:5173; /tai-khoan→/admin, chọn/tạo mã để hiện editor; /thu-vien; /tra-cuu. Production https://huyencanh.pages.dev/admin . Không ghi credential/dữ liệu khách/mã private vào báo cáo. Giữ lịch sử bên dưới.
+
+---
+
 ## Kết quả kiểm tra production quản trị — 2026-10-28 02:22 +07
 
 PASS thực tế: Cloudflare deployment 1c58f911-b616-4a33-b02a-335d06f2002c status success, commit f2c076f8a35885e3a30ca8b72974f0622cbf14d4. Browser production /admin với phiên password hiện tại đã tải danh sách, tạo mã, lưu bài giả, sửa lần2; /tra-cuu trả đúng nội dung mới. Đã xóa mềm duy nhất bản ghi kiểm thử vừa tạo, xác minh tra cứu mã đó bị từ chối; không tác động đơn cũ. Không lưu mã truy cập hoặc credential trong báo cáo. HTTP anon POST list401, paid /api/orders POST403. Thanh toán vẫn khóa, chỉ manual=true; RLS/private Storage/auth owner/password guard giữ nguyên.
