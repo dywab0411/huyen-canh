@@ -102,8 +102,10 @@ test("admin creates code, saves and edits text, lists and deletes a delivery wit
   await page.screenshot({
     path: "../.manual-simple-20261028/admin-local-fixture.png",
   });
-  page.on("dialog", (d) => d.accept());
   await page.getByRole("button", { name: "Xóa đơn hàng", exact: true }).click();
+  await page
+    .getByRole("button", { name: "Xác nhận xóa đơn", exact: true })
+    .click();
   await expect(
     page.getByText("Chưa có đơn hàng.", { exact: true }),
   ).toBeVisible();

@@ -18,6 +18,7 @@ export function ManualAdmin() {
     [body, setBody] = useState(""),
     [video, setVideo] = useState<string | null>(null),
     [busy, setBusy] = useState(false),
+    [deleteConfirmed, setDeleteConfirmed] = useState(false),
     [progress, setProgress] = useState<number | null>(null),
     [ready, setReady] = useState(false),
     [message, setMessage] = useState("");
@@ -42,6 +43,7 @@ export function ManualAdmin() {
     );
   }, []);
   function select(order: Order) {
+    setDeleteConfirmed(false);
     setSelected(order);
     setProgress(null);
     setBody(order.body);
@@ -51,6 +53,7 @@ export function ManualAdmin() {
   async function run(work: () => Promise<void>) {
     if (working.current) return;
     working.current = true;
+    setDeleteConfirmed(false);
     setBusy(true);
     setMessage("");
     try {
@@ -63,6 +66,7 @@ export function ManualAdmin() {
     }
   }
   function update(order: Order) {
+    setDeleteConfirmed(false);
     setSelected(order);
     setOrders((old) => [order, ...old.filter((o) => o.id !== order.id)]);
     setBody(order.body);
@@ -215,29 +219,47 @@ export function ManualAdmin() {
                 type="button"
                 className="button secondary"
                 disabled={busy}
-                onClick={() => {
-                  if (
-                    !window.confirm(
-                      "Xóa đơn này khỏi danh sách và ngừng tra cứu?",
-                    )
-                  )
-                    return;
-                  void run(async () => {
-                    await api("delivery", {
-                      action: "delete",
-                      id: selected.id,
-                      version: selected.version,
-                    });
-                    setOrders((old) => old.filter((o) => o.id !== selected.id));
-                    setSelected(null);
-                    setBody("");
-                    setVideo(null);
-                    setMessage("Đã xóa đơn khỏi danh sách và ngừng tra cứu.");
-                  });
-                }}
+                onClick={() => setDeleteConfirmed(true)}
               >
                 Xóa đơn hàng
               </button>
+              {deleteConfirmed && (
+                <div role="group" aria-label="Xác nhận xóa đơn">
+                  <p>Xóa đơn này khỏi danh sách và ngừng tra cứu?</p>
+                  <button
+                    type="button"
+                    disabled={busy}
+                    onClick={() =>
+                      void run(async () => {
+                        await api("delivery", {
+                          action: "delete",
+                          id: selected.id,
+                          version: selected.version,
+                        });
+                        setOrders((old) =>
+                          old.filter((o) => o.id !== selected.id),
+                        );
+                        setSelected(null);
+                        setBody("");
+                        setVideo(null);
+                        setProgress(null);
+                        setMessage(
+                          "Đã xóa đơn khỏi danh sách và ngừng tra cứu.",
+                        );
+                      })
+                    }
+                  >
+                    Xác nhận xóa đơn
+                  </button>
+                  <button
+                    type="button"
+                    disabled={busy}
+                    onClick={() => setDeleteConfirmed(false)}
+                  >
+                    Hủy xóa đơn
+                  </button>
+                </div>
+              )}
             </form>
           )}
           <div className="panel">

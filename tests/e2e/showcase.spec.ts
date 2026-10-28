@@ -2,6 +2,7 @@ import { test, expect } from "@playwright/test";
 test("admin shows separate order and library areas, edits library metadata and hides a video", async ({
   page,
 }) => {
+  let deleted = false;
   const row = {
     id: "30000000-0000-4000-8000-000000000001",
     title: "Fixture library",
@@ -17,7 +18,8 @@ test("admin shows separate order and library areas, edits library metadata and h
   );
   await page.route("**/api/showcase", async (r) => {
     const b = r.request().postDataJSON();
-    if (b.action === "list") return r.fulfill({ json: { videos: [row] } });
+    if (b.action === "list")
+      return r.fulfill({ json: { videos: deleted ? [] : [row] } });
     expect(b.id).toBe(row.id);
     expect(b.version).toBe(row.version);
     if (b.action === "save") {
@@ -28,6 +30,7 @@ test("admin shows separate order and library areas, edits library metadata and h
       row.visibility = "hidden";
       row.version++;
     }
+    if (b.action === "delete") deleted = true;
     return r.fulfill({ json: { video: row } });
   });
   await page.goto("/admin");
@@ -59,6 +62,23 @@ test("admin shows separate order and library areas, edits library metadata and h
   await expect(
     page.getByRole("combobox", { name: "Hiển thị", exact: true }),
   ).toHaveValue("hidden");
+  await page.getByRole("button", { name: "Xóa video", exact: true }).click();
+  await expect(
+    page.getByRole("button", { name: "Xác nhận xóa video", exact: true }),
+  ).toBeVisible();
+  expect(deleted).toBe(false);
+  await page
+    .getByRole("button", { name: "Hủy xóa video", exact: true })
+    .click();
+  expect(deleted).toBe(false);
+  await page.getByRole("button", { name: "Xóa video", exact: true }).click();
+  await page
+    .getByRole("button", { name: "Xác nhận xóa video", exact: true })
+    .click();
+  await expect(
+    page.getByRole("button", { name: "Changed fixture", exact: true }),
+  ).toHaveCount(0);
+  expect(deleted).toBe(true);
 });
 test("gallery plays published video and renders description safely", async ({
   page,

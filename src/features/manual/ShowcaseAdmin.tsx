@@ -21,6 +21,7 @@ export function ShowcaseAdmin() {
     [visibility, setVisibility] = useState<"hidden" | "public">("hidden"),
     [rights, setRights] = useState(false),
     [busy, setBusy] = useState(false),
+    [pendingDelete, setPendingDelete] = useState<string | null>(null),
     [message, setMessage] = useState(""),
     [progress, setProgress] = useState(0),
     [uploadName, setUploadName] = useState("");
@@ -40,6 +41,7 @@ export function ShowcaseAdmin() {
     );
   }, []);
   function select(v: Video | null) {
+    setPendingDelete(null);
     setSelected(v);
     setFiles([]);
     setTitle(v?.title ?? "");
@@ -52,6 +54,7 @@ export function ShowcaseAdmin() {
   async function run(work: () => Promise<void>) {
     if (lock.current) return;
     lock.current = true;
+    setPendingDelete(null);
     setBusy(true);
     setMessage("");
     try {
@@ -147,7 +150,10 @@ export function ShowcaseAdmin() {
           void run(save);
         }}
       >
-        <fieldset disabled={busy}>
+        <fieldset
+          style={{ border: 0, padding: 0, margin: 0, minWidth: 0 }}
+          disabled={busy}
+        >
           <h3>{selected ? "Chỉnh sửa video" : "Đăng video"}</h3>
           {!selected && (
             <label>
@@ -219,7 +225,7 @@ export function ShowcaseAdmin() {
           <div>
             <p>
               {uploadName} · {progress}%
-              {progress === 100 ? " · Đã tải tệp, đang xác minh/lưu" : ""}
+              {progress === 100 ? " · Đã tải tệp" : ""}
             </p>
             <progress
               aria-label="Tiến độ tải video thư viện"
@@ -270,24 +276,34 @@ export function ShowcaseAdmin() {
             >
               Ẩn video
             </button>
-            <button
-              disabled={busy}
-              onClick={() => {
-                if (!window.confirm("Xóa video này khỏi thư viện?")) return;
-                void run(async () => {
-                  await api("showcase", {
-                    action: "delete",
-                    id: v.id,
-                    version: v.version,
-                  });
-                  await load();
-                  if (selected?.id === v.id) select(null);
-                  setMessage("Đã xóa video khỏi thư viện.");
-                });
-              }}
-            >
+            <button disabled={busy} onClick={() => setPendingDelete(v.id)}>
               Xóa video
             </button>
+            {pendingDelete === v.id && (
+              <div role="group" aria-label="Xác nhận xóa video">
+                <p>Xóa video này khỏi thư viện?</p>
+                <button
+                  disabled={busy}
+                  onClick={() =>
+                    void run(async () => {
+                      await api("showcase", {
+                        action: "delete",
+                        id: v.id,
+                        version: v.version,
+                      });
+                      await load();
+                      if (selected?.id === v.id) select(null);
+                      setMessage("Đã xóa video khỏi thư viện.");
+                    })
+                  }
+                >
+                  Xác nhận xóa video
+                </button>
+                <button disabled={busy} onClick={() => setPendingDelete(null)}>
+                  Hủy xóa video
+                </button>
+              </div>
+            )}
           </article>
         ))}
         {videos.length >= 50 && (
