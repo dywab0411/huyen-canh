@@ -36,3 +36,7 @@ UI PaymentInfo hiển thị số tiền từ snapshot đơn và order_code riên
 5. Sau xác nhận mới tạo đúng một đơn10.000đ trên UI thật; người dùng tự quét/chỉnh số tiền/nội dung/chuyển tiền. Chủ tài khoản đối chiếu giao dịch rồi tự xác nhận tiền; trả bài và kiểm tra theo mã đơn. Báo riêng từng bước thực tế.
 
 Không cần bạn đổi cấu hình Cloudflare/Supabase để bật tiền trong lượt nâng cấp thư viện. Migration015 chỉ áp dụng sau xác nhận riêng, không chạy lại001–014. Các điều kiện chưa kiểm chứng ở trên là chặn phát hành có thật, không phải lỗi nhập mật khẩu.
+
+
+## Hậu kiểm sau nâng cấp
+Cloud private video và thư viện MP4/WebM đã upload/phát/sửa/ẩn/xóa mềm thật. Mã đúng anonymous200, mãsai/đãxóa404, publicprivatepath400, expiredsignedlink400; anonadminlist401. Paidorders/claim-transfer vẫn403, checkoutfalse/runtimepreviewtrue. QRCRCđúng. Điều này không bỏ các gate paid/MFA/refund/retention/release/backup nêu trên; chưa đủbậtcheckout.

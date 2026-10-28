@@ -46,3 +46,6 @@ Chủ dự án hiện cho phép triển khai bản xem thử nếu đủ quyền
 
 ## 2026-10-28 — yêu cầu mới: vận hành tối giản
 UI /tai-khoan chỉ admin/mật khẩu; /admin soạn chữ/video và mã; /tra-cuu một mã không login. Không signup khách hoặc Google button. Module thủ công dùng Supabase Auth password + owner check backend, manual feature flag riêng; không hạ MFA/checkout của module paid cũ. Migration014 additive và private bucket, chỉ apply cloud sau xác nhận. Mật khẩu từng chia sẻ phải đổi, không agent nhập credential mới hoặc commit password. Giữ dữ liệu paid/legacy và thanh toán khóa. SIMPLE_ADMIN_SETUP.md là hướng dẫn mới nhất cho module này.
+
+## 2026-10-28 — Admin thư viện và tiền thật
+Giữ giao diện và module manual014. Showcase015 dùng bucket private riêng, chỉ công khai video biên tập có quyền, không tự chuyển nội dung khách từ manual-results. Migration015 đã áp dụng có xác nhận; không rerun. Đọc ADMIN_VIDEO_GUIDE, ADMIN_VIDEO_VERIFICATION, REAL_PAYMENT_READINESS. Không mở checkout khi gate chưa đạt; chỉ xin xác nhận bật tiền sau nghiệm thu, người dùng tự chuyển khoản và đối chiếu. Không bỏ MFA/role guard legacy để làm test đạt. Xóa mềm có xác nhận inline; signed URL đã cấp vẫn có TTL, không hứa thu hồi tức thì.

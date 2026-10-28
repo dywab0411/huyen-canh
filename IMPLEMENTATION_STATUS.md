@@ -124,3 +124,6 @@ Module thủ công tách biệt đơn thanh toán: login tối giản, password 
 
 ## 2026-10-28 HC-ADMIN-015
 Local56unit/87integration/55E2E pass, migration015 đã áp dụng xác nhận. Cloud upload/player đang chờ deploy/test; real-money checkout BLOCKED. Xem ADMIN_VIDEO_GUIDE và REAL_PAYMENT_READINESS.
+
+## Hậu kiểm HC-ADMIN-015
+PASS cloud trong phạm vi video MP4/WebM, multi-upload, private lookup, edit/hide/soft-delete/cancel;198 local tests PASS. CheckoutBLOCKED không bật. Xem ADMIN_VIDEO_VERIFICATION/REAL_PAYMENT_READINESS và CODEX_REPORT mới nhất.

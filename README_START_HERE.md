@@ -1,3 +1,9 @@
+# Nâng cấp Admin/video — 28/10/2026
+
+Hai vùng quản trị đã triển khai. Xem [ADMIN_VIDEO_GUIDE.md](ADMIN_VIDEO_GUIDE.md), bằng chứng [ADMIN_VIDEO_VERIFICATION.md](ADMIN_VIDEO_VERIFICATION.md), điều kiện tiền thật [REAL_PAYMENT_READINESS.md](REAL_PAYMENT_READINESS.md) và báo cáo mới nhất. Migration015 đã áp dụng sau xác nhận; không chạy lại. Checkout vẫn khóa.
+
+---
+
 # Cập nhật 28/10/2026: hệ thống tối giản
 
 Đọc SIMPLE_ADMIN_SETUP.md và bốn CODEX reports mới nhất. UI chính: /tai-khoan đăng nhập admin, /admin tạo mã/soạn chữ/video, /tra-cuu khách xem theo mã. Thanh toán vẫn khóa. Migration014 và mật khẩu mới/QA cloud là điều kiện mở chức năng thật; không chạy lại migrations001–013. Tài liệu yêu cầu cũ bên dưới giữ để truy vết, yêu cầu mới của chủ website có ưu tiên.

@@ -21,3 +21,7 @@ Migration015 chỉ chạy một lần sau001–014. Nếu project đã có showc
 Giữ MANUAL_DELIVERY_ENABLED=true cho đơn thủ công + thư viện. CHECKOUT_ENABLED=false, PUBLIC_PREVIEW_ONLY=true vẫn khóa luồng nhận tiền cũ. Build Vite hiện dùng cấu hình Auth public hợp lệ; VITE_PUBLIC_PREVIEW_ONLY=true sẽ chặn các trang tài khoản/admin/đặt đơn ở build-time, không phải cách mở checkout. Sau sửa biến VITE phải rebuild.
 
 Rollback UI/API: quay lại commit trước nâng cấp hoặc tạm manual=false nếu phải đóng cả module thủ công; giữ bảng và tệp, không DROP migration, không xóa dữ liệu cũ.
+
+
+## Trạng thái áp dụng
+Migration015 đã áp dụng vào project hiện tại sau xác nhận; KHÔNG chạy lại. Bản Admin/video đã kiểm thử production. Xóa dùng bước Xác nhận xóa ngay trong trang; Hủy không gửi thao tác xóa. Không cần đổi cấu hình Cloudflare/Supabase để dùng hai vùng quản trị đã triển khai. Thanh toán vẫn khóa.
